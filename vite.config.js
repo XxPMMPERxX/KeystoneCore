@@ -13,8 +13,6 @@ export default defineConfig({
       formats: ['es'],
     },
     rollupOptions: {
-      outDir: 'dist',
-      emptyOutDir: true,
       external: [
         '@minecraft/server',
         '@minecraft/server-net',

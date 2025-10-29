@@ -1,5 +1,5 @@
 {
-  "name": "keytone",
+  "name": "keystone",
   "version": "1.0.0",
   "description": "ScriptAPI Wrapper",
   "type": "module",
@@ -8,7 +8,7 @@
   },
   "main": "./dist/index.js",
   "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "types": "./dist/core/keystone.d.ts",
   "exports": {
     ".": {
       "types": "./dist/core/keystone.d.ts",
