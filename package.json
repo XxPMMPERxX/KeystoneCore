@@ -1,0 +1,33 @@
+{
+  "name": "keytone",
+  "version": "1.0.0",
+  "description": "ScriptAPI Wrapper",
+  "type": "module",
+  "scripts": {
+    "build": "tsc && vite build"
+  },
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/core/keystone.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./vite-plugin": {
+      "types": "./dist/vite-plugin/index.d.ts",
+      "import": "./dist/vite.js"
+    }
+  },
+  "devDependencies": {
+    "@minecraft/server": "^2.3.0-beta.1.21.114-stable",
+    "@minecraft/server-net": "^1.0.0-beta.1.21.114-stable",
+    "@minecraft/server-ui": "^2.1.0-beta.1.21.114-stable",
+    "@eslint/js": "^9.38.0",
+    "eslint": "^9.38.0",
+    "typescript": "~5.9.3",
+    "typescript-eslint": "^8.46.2",
+    "vite": "^7.1.7",
+    "vite-plugin-dts": "^4.5.4"
+  }
+}

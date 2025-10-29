@@ -1,9 +1,9 @@
-import { Listener } from "./event";
+import type { Listener } from './event';
 
 export class EventManager {
   static instance: EventManager;
 
-  private listeners: Listener[];
+  private listeners: Listener[] = [];
 
   constructor () {
     if (EventManager.instance) {
