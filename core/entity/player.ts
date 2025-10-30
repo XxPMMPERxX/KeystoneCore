@@ -28,6 +28,24 @@ export class PlayerRegistry {
     };
     return _Player._players.get(playerId) as KeystonePlayer;
   }
+
+  /**
+   * プレイヤーオブジェクトから存在確認
+   * @param {Player} player
+   * @returns {boolean}
+   */
+  static findByPlayer(player: Player): boolean {
+    return _Player._players.has(player.id);
+  }
+
+  /**
+   * IDから存在確認
+   * @param {string} playerId
+   * @returns {boolean}
+   */
+  static findById(playerId: string): boolean {
+    return _Player._players.has(playerId);
+  }
 }
 
 /**
