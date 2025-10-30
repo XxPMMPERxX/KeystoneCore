@@ -7,10 +7,11 @@ export default defineConfig({
   build: {
     lib: {
       entry: {
-        index: resolve(__dirname, 'core/keystone.ts'),
-        vite: resolve(__dirname, 'vite-plugin/index.ts'),
+        'index': resolve(__dirname, 'core/index.ts'),
+        'vite-plugin/index': resolve(__dirname, 'vite-plugin/index.ts'),
       },
       formats: ['es'],
+      fileName: (_format, entryName) => `${entryName}.js`,
     },
     rollupOptions: {
       external: [
