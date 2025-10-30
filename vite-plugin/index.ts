@@ -39,7 +39,7 @@ const behaviorPacker = ({
             '@minecraft/server-ui',
           ],
           input: {
-            index: resolve(__dirname, './src/index.ts'),
+            index: resolve(process.cwd(), './src/index.ts'),
           },
         },
       },
