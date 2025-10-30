@@ -5,6 +5,7 @@ import { resolve } from 'path';
 export default defineConfig({
   plugins: [dts()],
   build: {
+    ssr: true,
     lib: {
       entry: {
         'index': resolve(__dirname, 'core/index.ts'),
@@ -18,6 +19,9 @@ export default defineConfig({
         '@minecraft/server',
         '@minecraft/server-net',
         '@minecraft/server-ui',
+        'path',
+        'node:crypto',
+        'node:fs',
       ],
     }
   },

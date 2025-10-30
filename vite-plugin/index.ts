@@ -1,4 +1,5 @@
-import type { UserConfig } from 'vite';
+import type { Plugin, UserConfig } from 'vite';
+import type { OutputBundle, NormalizedOutputOptions } from 'rollup';
 import { resolve } from 'path';
 import * as crypto from 'node:crypto';
 import * as fs from 'node:fs';
@@ -22,7 +23,7 @@ const behaviorPacker = ({
   description: '',
   authors: [],
   version: [1, 0, 0]
- }) => ({
+ }): Plugin => ({
   name: 'BehaviorPacker',
   config: (config: UserConfig) => {
     return {
@@ -44,11 +45,13 @@ const behaviorPacker = ({
       },
     }
   },
-  writeBundle: async (_: any, outputFiles: { isEntry: boolean, fileName: string }[]) => {
-    const entryFile = Object.values(outputFiles).find(({ isEntry }) => isEntry);
+  writeBundle: async (_options: NormalizedOutputOptions, bundle: OutputBundle) => {
+    const entryFile = Object.values(bundle).find(
+      (file) => file.type === 'chunk' && file.isEntry
+    );
 
-    if (!entryFile) {
-      throw new Error();
+    if (!entryFile || entryFile.type !== 'chunk') {
+      throw new Error('No entry file found');
     }
 
     const behaviorUUID = uuid ?? crypto.randomUUID();
@@ -68,7 +71,7 @@ const behaviorPacker = ({
           "language": "javascript",
           "uuid": crypto.randomUUID(),
           "version": [1, 0, 0],
-          "entry": `scripts/${entryFile.fileName}`,
+          "entry": entryFile.type === 'chunk' ? `scripts/${entryFile.fileName}` : '',
         }
       ],
       "dependencies": [
