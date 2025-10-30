@@ -1,15 +1,6 @@
 import { system } from '@minecraft/server';
 
-export class Scheduler {
-  static instance: Scheduler;
-
-  constructor () {
-    if (Scheduler.instance) {
-      return Scheduler.instance;
-    }
-    Scheduler.instance = this;
-  }
-
+class Scheduler {
   /**
    * リピート処理
    * @param {()=>void} callback
@@ -21,7 +12,7 @@ export class Scheduler {
     let id: number = -1;
 
     system.runTimeout(() => {
-      id = system.runInterval(() => callback, period);
+      id = system.runInterval(() => callback(), period);
     }, firstDelay);
 
     return id;
@@ -54,10 +45,12 @@ export class Scheduler {
   /**
    * 遅延処理
    * @param {()=>void} callback
-   * @param {number} delay
+   * @param {number} delay tick
    * @returns {number}
    */
-  scheduleDelayedTask(callback: ()=>void, delay: number): number {
-    return system.runTimeout(() => callback, delay);
+  scheduleDelayedTask(callback: () => void, delay: number): number {
+    return system.runTimeout(() => callback(), delay);
   }
 }
+
+export const scheduler = new Scheduler();

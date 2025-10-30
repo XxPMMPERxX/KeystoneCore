@@ -1,3 +1,4 @@
 src/**/*.js
 node_modules/
 dist/
+DONT_COMMIT_ME.sh
