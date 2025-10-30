@@ -12,28 +12,52 @@ export class Scheduler {
 
   /**
    * リピート処理
-   * @param callback
-   * @param period 
-   * @param delay
+   * @param {()=>void} callback
+   * @param {number} period 
+   * @param {number} firstDelay
    * @returns {number}
    */
-  scheduleRepeatingTask(callback: ()=>undefined, period: number, delay: number = 0): number {
+  scheduleRepeatingTask(callback: ()=>void, period: number, firstDelay: number = 0): number {
     let id: number = -1;
 
     system.runTimeout(() => {
       id = system.runInterval(() => callback, period);
-    }, delay);
+    }, firstDelay);
+
+    return id;
+  }
+
+  /**
+   * 同期的状況待ち処理
+   * @param {()=>void} callback
+   * @param {()=>boolean} until
+   * @param {number} period
+   * @param {number} firstDelay
+   * @returns {number}
+   */
+  scheduleUntilCompleteTask(callback: ()=>void, until: ()=>boolean, period: number = 1, firstDelay: number = 0): number {
+    let id: number = -1;
+
+    system.runTimeout(() => {
+      id = system.runInterval(() => {
+        if (until()) {
+          system.clearRun(id);
+        } else {
+          callback();
+        }
+      }, period);
+    }, firstDelay);
 
     return id;
   }
 
   /**
    * 遅延処理
-   * @param callback
-   * @param delay
+   * @param {()=>void} callback
+   * @param {number} delay
    * @returns {number}
    */
-  scheduleDelayedTask(callback: ()=>undefined, delay: number): number {
+  scheduleDelayedTask(callback: ()=>void, delay: number): number {
     return system.runTimeout(() => callback, delay);
   }
 }
