@@ -7,6 +7,7 @@ BDS plugin library: Script API base
 Git Clone
 ```bash
 git clone https://github.com/XxPMMPERxX/KeystoneCore.git
+# git clone git@github.com:XxPMMPERxX/KeystoneCore.git
 cd KeystoneCore
 ```
 NPM install
@@ -16,6 +17,7 @@ npm install --force && npm run build
 Install Dev Server
 ```bash
 git clone https://github.com/XxPMMPERxX/Keystone.git dev
+# git clone git@github.com:XxPMMPERxX/Keystone.git dev
 cd dev
 ```
 Edit docker-compose.yml
@@ -35,6 +37,10 @@ make .env
 ```bash
 cp .env.example .env
 # edit .env
+```
+Edit dev/package.json "keystone"
+```package.json
+"keystone": "file:../",
 ```
 start dev server
 ```bash
