@@ -1,6 +1,7 @@
-import { Player, PlayerJoinAfterEvent, PlayerLeaveAfterEvent, PlayerSpawnAfterEvent, world } from '@minecraft/server';
+import { ItemUseBeforeEvent, Player, PlayerBreakBlockBeforeEvent, PlayerJoinAfterEvent, PlayerLeaveAfterEvent, PlayerPlaceBlockAfterEvent, PlayerSpawnAfterEvent, system, world } from '@minecraft/server';
 import { _Vector3 } from '../math/vector3';
 import { delegate } from '../utils/delegate';
+import { listen } from '../event/event';
 
 export type KeystonePlayer = _Player & Player;
 
@@ -71,22 +72,25 @@ class _Player {
   }
 
   public origin: Player;
-  public lastLocation: _Vector3;
+  public isFreezing: boolean;
 
   private constructor(player: Player) {
     this.origin = player;
-    this.lastLocation = _Vector3.fromBDS(player.location);
+    this.isFreezing = false;
+  }
+
+  public setFreeze(freezing: boolean): void {
+    this.isFreezing = freezing;
   }
 }
 
+// === KeystonePlayerへの登録とキャッシュ削除 ===
 const wrappingQueue: Map<string, boolean> = new Map();
-
 world.afterEvents.playerJoin.subscribe((event: PlayerJoinAfterEvent) => {
   if (!wrappingQueue.has(event.playerId)) {
     wrappingQueue.set(event.playerId, true);
   }
 });
-
 world.afterEvents.playerSpawn.subscribe((event: PlayerSpawnAfterEvent) => {
   if (event.initialSpawn && wrappingQueue.has(event.player.id)) {
     _Player.hello(event.player);
@@ -94,8 +98,23 @@ world.afterEvents.playerSpawn.subscribe((event: PlayerSpawnAfterEvent) => {
     wrappingQueue.delete(event.player.id);
   }
 });
-
 world.afterEvents.playerLeave.subscribe((event: PlayerLeaveAfterEvent) => {
   _Player.bye(event.playerId);
 });
 
+// === Freeze ===
+listen(world.beforeEvents.playerBreakBlock, (event: PlayerBreakBlockBeforeEvent) => {
+  const player = event.player as KeystonePlayer;
+  if (player.isFreezing) event.cancel = true;
+});
+listen(world.beforeEvents.itemUse, (event: ItemUseBeforeEvent) => {
+  const player = event.source as KeystonePlayer;
+  if (player.isFreezing) event.cancel = true;
+});
+system.runInterval(() => {
+  for (const player of world.getPlayers()) {
+    if (PlayerRegistry.findByPlayer(player)) {
+      if (PlayerRegistry.fromPlayer(player).isFreezing) player.teleport(player.location);
+    }
+  }
+}, 5); // 約0.25秒ごと
