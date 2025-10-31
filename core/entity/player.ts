@@ -1,4 +1,4 @@
-import { Player, PlayerLeaveAfterEvent, PlayerSpawnAfterEvent, world } from '@minecraft/server';
+import { Player, PlayerJoinAfterEvent, PlayerLeaveAfterEvent, PlayerSpawnAfterEvent, world } from '@minecraft/server';
 import { _Vector3 } from '../math/vector3';
 import { delegate } from '../utils/delegate';
 
@@ -79,8 +79,20 @@ class _Player {
   }
 }
 
+const wrappingQueue: Map<string, boolean> = new Map();
+
+world.afterEvents.playerJoin.subscribe((event: PlayerJoinAfterEvent) => {
+  if (!wrappingQueue.has(event.playerId)) {
+    wrappingQueue.set(event.playerId, true);
+  }
+});
+
 world.afterEvents.playerSpawn.subscribe((event: PlayerSpawnAfterEvent) => {
-  if (event.initialSpawn) _Player.hello(event.player);
+  if (event.initialSpawn && wrappingQueue.has(event.player.id)) {
+    _Player.hello(event.player);
+
+    wrappingQueue.delete(event.player.id);
+  }
 });
 
 world.afterEvents.playerLeave.subscribe((event: PlayerLeaveAfterEvent) => {
