@@ -4,6 +4,7 @@ import tseslint from 'typescript-eslint';
 
 export default defineConfig({
   files: ['src/**/*.ts'],
+  ignores: ['dev/**/*.ts'],
   extends: [
     eslint.configs.recommended,
     tseslint.configs.recommended,
