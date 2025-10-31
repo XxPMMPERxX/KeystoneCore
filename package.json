@@ -4,8 +4,7 @@
   "description": "ScriptAPI Wrapper",
   "type": "module",
   "scripts": {
-    "build": "tsc && vite build",
-    "prepare": "npm run build"
+    "build": "tsc && vite build"
   },
   "main": "./dist/index.js",
   "module": "./dist/index.js",
