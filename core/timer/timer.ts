@@ -5,7 +5,7 @@ enum CancelResult {
 }
 
 abstract class Timer {
-  public uniqueId: string;
+  protected uniqueId: string;
   public label: string;
   protected runnerId?: number;
   protected currentTick: number = 0;
@@ -16,14 +16,21 @@ abstract class Timer {
   protected flagForForceCancel: boolean = false;
   
   constructor(
-    label?: string,
     onRun?: (currentTick: number)=>void,
     onCancel?: ()=>void
   ) {
     this.uniqueId = `#${Math.floor(Math.random() * 10000)}`;
-    this.label = (label) ? label : this.uniqueId.toString();
+    this.label = this.uniqueId.toString();
     this.onRun = onRun;
     this.onCancel = onCancel;
+  }
+
+  /**
+   * 識別子の取得
+   * @returns 
+   */
+  getUniqueId(): string {
+    return this.uniqueId;
   }
 
   /**
@@ -80,6 +87,14 @@ abstract class Timer {
   }
 
   /**
+   * 止まっているかどうか
+   * @returns {boolean}
+   */
+  isStopped(): boolean {
+    return this.flagForStop;
+  }
+
+  /**
    * タイマー停止
    */
   stop(): void {
@@ -103,7 +118,27 @@ type RepeatingOptions = {
 }
 
 export class RepeatingTimer extends Timer {
-  protected options: RepeatingOptions = {}
+  /**
+   * 静的生成のヘルパー関数
+   * @returns {RepeatingTimer}
+   */
+  static run(
+    onRun?: (currentTick: number)=>void,
+    options: RepeatingOptions = {
+      period: 1,
+      isEndless: true,
+      isSilenceOnStop: true,
+      maxElapsedTicks: 5*60*20,
+      onFinal: ()=>{}
+    },
+    onCancel?: ()=>void
+  ): RepeatingTimer {
+    const repeatingTimer = new RepeatingTimer(onRun, options, onCancel);
+    repeatingTimer.start();
+
+    return repeatingTimer;
+  }
+
   private period?: number;
   private isEndless?: boolean;
   private isSilenceOnStop?: boolean;
@@ -111,18 +146,17 @@ export class RepeatingTimer extends Timer {
   private onFinal?: ()=>void;
 
   constructor(
-    label?: string,
     onRun?: (currentTick: number)=>void,
-    onCancel?: ()=>void,
     options: RepeatingOptions = {
       period: 1,
       isEndless: true,
       isSilenceOnStop: true,
       maxElapsedTicks: 5*60*20,
       onFinal: ()=>{}
-    }
+    },
+    onCancel?: ()=>void
   ) {
-    super(label, onRun, onCancel);
+    super(onRun, onCancel);
 
     this.period = options.period;
     this.isEndless = options.isEndless;
@@ -138,6 +172,16 @@ export class RepeatingTimer extends Timer {
    */
   setPeriod(period: number): RepeatingTimer {
     this.period = period;
+    return this;
+  }
+
+  /**
+   * 最大処理ティック
+   * @param maxElapsedTicks
+   * @returns {RepeatingTimer}
+   */
+  setMaxElapsedTicks(maxElapsedTicks: number): RepeatingTimer {
+    this.maxElapsedTicks = maxElapsedTicks;
     return this;
   }
 
@@ -171,6 +215,9 @@ export class RepeatingTimer extends Timer {
     return this;
   }
 
+  /**
+   * @inheritdoc
+   */
   start(): void {
     this.runnerId = system.runInterval(() => {
       if (this.flagForForceCancel) this.internalCancel(true);
@@ -185,6 +232,65 @@ export class RepeatingTimer extends Timer {
         }
       }
       if (!this.flagForStop) this.currentTick++;
+    }, 1);
+  }
+}
+
+type DelayedOptions = {
+  delay?: number;
+}
+
+export class DelayedTimer extends Timer {
+  /**
+   * 静的生成のヘルパー関数
+   * @returns {DelayedTimer}
+   */
+  static run(
+    onRun?: (currentTick: number)=>void,
+    options: DelayedOptions = { delay: 1 },
+    onCancel?: ()=>void
+  ): DelayedTimer {
+    const delayedTimer = new DelayedTimer(onRun, options, onCancel);
+    delayedTimer.start();
+
+    return delayedTimer;
+  }
+
+  private delay?: number;
+
+  constructor(
+    onRun?: (currentTick: number)=>void,
+    options: DelayedOptions = { delay: 1 },
+    onCancel?: ()=>void
+  ) {
+    super(onRun, onCancel);
+
+    this.delay = options.delay;
+  }
+
+  /**
+   * 処理開始までのティック
+   * @param delay
+   * @returns {DelayedTimer}
+   */
+  setDelay(delay: number): DelayedTimer {
+    this.delay = delay;
+    return this;
+  }
+
+  /**
+   * @inheritdoc
+   */
+  start(): void {
+    this.runnerId = system.runInterval(() => {
+      if (this.flagForForceCancel) this.internalCancel(true);
+      if (this.flagForCancel) this.internalCancel();
+
+      if (this.currentTick >= (this.delay ?? 0)) {
+        this.onRun?.(this.currentTick);
+        this.internalCancel();
+      }
+      this.currentTick++;
     }, 1);
   }
 }
