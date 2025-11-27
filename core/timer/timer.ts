@@ -1,296 +1,241 @@
 import { system } from "@minecraft/server";
 
-enum CancelResult {
-  SUCCESS, FORCE, FAILURE
-}
+/**
+ * ============================================================
+ * マスター Interval（負荷分散スケジューラ）
+ * ============================================================
+ */
 
-abstract class Timer {
-  protected uniqueId: string;
-  public label: string;
-  protected runnerId?: number;
-  protected currentTick: number = 0;
-  protected onRun?: (currentTick: number)=>void;
-  protected onCancel?: ()=>void;
-  protected flagForStop: boolean = false;
-  protected flagForCancel: boolean = false;
-  protected flagForForceCancel: boolean = false;
-  
-  constructor(
-    onRun?: (currentTick: number)=>void,
-    onCancel?: ()=>void
-  ) {
-    this.uniqueId = `#${Math.floor(Math.random() * 10000)}`;
-    this.label = this.uniqueId.toString();
-    this.onRun = onRun;
-    this.onCancel = onCancel;
+export class TimerScheduler {
+  private static tasks: Set<() => void> = new Set();
+  private static tick = 0;
+  private static started = false;
+
+  /** スケジューラにタスクを登録 */
+  static addTask(task: () => void) {
+    this.tasks.add(task);
+    this.ensureStarted();
   }
 
-  /**
-   * 識別子の取得
-   * @returns 
-   */
-  getUniqueId(): string {
-    return this.uniqueId;
+  /** タスクを削除 */
+  static removeTask(task: () => void) {
+    this.tasks.delete(task);
   }
 
-  /**
-   * メイン処理
-   * @param onRun 
-   * @returns {Timer}
-   */
-  setRunHandler(onRun: (currentTick: number)=>void): Timer {
-    this.onRun = onRun;
-    return this;
-  }
+  /** Interval を開始（1 本だけ） */
+  private static ensureStarted() {
+    if (this.started) return;
+    this.started = true;
 
-    /**
-   * 中断時のハンドラの設定
-   * @param onCancel 
-   * @returns {Timer}
-   */
-  setCancelHandler(onCancel: ()=>void): Timer {
-    this.onCancel = onCancel;
-    return this;
-  }
+    system.runInterval(() => {
+      this.tick++;
 
-  /**
-   * タイマースタート
-   */
-  abstract start(): void;
-
-  /**
-   * タイマーキャンセル
-   * @param force
-   */
-  cancel(force: boolean = false): void {
-    if (force) this.flagForForceCancel = true;
-    this.flagForCancel = true;
-  }
-
-  /**
-   * タイマーキャンセル
-   * @param force 
-   * @returns {CancelResult}
-   */
-  protected internalCancel(force: boolean = false): CancelResult {
-    if (!this.runnerId) {
-      console.warn(`[Keystone][Timer] タイマーが動いていないか既に削除されています！ (${this.uniqueId.toString()})`);
-      return CancelResult.FAILURE;
-    }
-    system.clearRun(this.runnerId);
-
-    if (force) {
-      this.onCancel?.();
-      return CancelResult.FORCE;
-    }
-    return CancelResult.SUCCESS;
-  }
-
-  /**
-   * 止まっているかどうか
-   * @returns {boolean}
-   */
-  isStopped(): boolean {
-    return this.flagForStop;
-  }
-
-  /**
-   * タイマー停止
-   */
-  stop(): void {
-    this.flagForStop = true;
-  }
-
-  /**
-   * タイマー再開
-   */
-  resume(): void {
-    this.flagForStop = false;
-  }
-}
-
-type RepeatingOptions = {
-  period?: number;
-  isEndless?: boolean;
-  isSilenceOnStop?: boolean;
-  maxElapsedTicks?: number;
-  onFinal?: ()=>void;
-}
-
-export class RepeatingTimer extends Timer {
-  /**
-   * 静的生成のヘルパー関数
-   * @returns {RepeatingTimer}
-   */
-  static run(
-    onRun?: (currentTick: number)=>void,
-    options: RepeatingOptions = {
-      period: 1,
-      isEndless: true,
-      isSilenceOnStop: true,
-      maxElapsedTicks: 5*60*20,
-      onFinal: ()=>{}
-    },
-    onCancel?: ()=>void
-  ): RepeatingTimer {
-    const repeatingTimer = new RepeatingTimer(onRun, options, onCancel);
-    repeatingTimer.start();
-
-    return repeatingTimer;
-  }
-
-  private period?: number;
-  private isEndless?: boolean;
-  private isSilenceOnStop?: boolean;
-  private maxElapsedTicks?: number;
-  private onFinal?: ()=>void;
-
-  constructor(
-    onRun?: (currentTick: number)=>void,
-    options: RepeatingOptions = {
-      period: 1,
-      isEndless: true,
-      isSilenceOnStop: true,
-      maxElapsedTicks: 5*60*20,
-      onFinal: ()=>{}
-    },
-    onCancel?: ()=>void
-  ) {
-    super(onRun, onCancel);
-
-    this.period = options.period;
-    this.isEndless = options.isEndless;
-    this.isSilenceOnStop = options.isSilenceOnStop;
-    this.maxElapsedTicks = options.maxElapsedTicks;
-    this.onFinal = options.onFinal;
-  }
-
-  /**
-   * 処理の間隔のティック
-   * @param period
-   * @returns {RepeatingTimer}
-   */
-  setPeriod(period: number): RepeatingTimer {
-    this.period = period;
-    return this;
-  }
-
-  /**
-   * 最大処理ティック
-   * @param maxElapsedTicks
-   * @returns {RepeatingTimer}
-   */
-  setMaxElapsedTicks(maxElapsedTicks: number): RepeatingTimer {
-    this.maxElapsedTicks = maxElapsedTicks;
-    return this;
-  }
-
-  /**
-   * 永久に動かすかどうか
-   * @param value 
-   * @returns {RepeatingTimer}
-   */
-  setEndless(value: boolean): RepeatingTimer {
-    this.isEndless = value;
-    return this;
-  }
-
-  /**
-   * ストップしているときにRunハンドラを動かすかどうか
-   * @param value
-   * @returns {RepeatingTimer}
-   */
-  setSilenceOnStop(value: boolean): RepeatingTimer {
-    this.isSilenceOnStop = value;
-    return this;
-  }
-
-  /**
-   * 天井あり処理の終了時のハンドラ
-   * @param onFinal 
-   * @returns {RepeatingTimer}
-   */
-  setFinalHandler(onFinal: ()=>void): RepeatingTimer {
-    this.onFinal = onFinal;
-    return this;
-  }
-
-  /**
-   * @inheritdoc
-   */
-  start(): void {
-    this.runnerId = system.runInterval(() => {
-      if (this.flagForForceCancel) this.internalCancel(true);
-      if (this.flagForCancel) this.internalCancel();
-      if (this.currentTick % (this.period ?? 1) == 0) {
-        if (!this.isEndless && this.maxElapsedTicks && this.maxElapsedTicks <= this.currentTick) {
-          this.onFinal?.();
-          this.internalCancel();
-        }
-        if (!this.flagForStop || (this.flagForStop && !this.isSilenceOnStop)) {
-          this.onRun?.(this.currentTick);
+      for (const task of this.tasks) {
+        try {
+          task();
+        } catch (e) {
+          console.error("[TimerScheduler] Task error:", e);
         }
       }
-      if (!this.flagForStop) this.currentTick++;
     }, 1);
   }
 }
 
-type DelayedOptions = {
+/** 内部キャンセル結果 */
+enum CancelResult {
+  SUCCESS,
+  FORCE,
+  FAILURE,
+}
+
+/**
+ * ============================================================
+ * Base Timer
+ * ============================================================
+ * スケジューラに登録され、tick ごとに管理される抽象クラス
+ */
+abstract class Timer {
+  protected currentTick = 0;
+  protected onRun?: (currentTick: number) => void;
+  protected onCancel?: () => void;
+  protected stopped = false;
+  protected canceled = false;
+  protected forceCanceled = false;
+
+  /** スケジューラに登録されたタスク */
+  protected task?: () => void;
+
+  constructor(onRun?: (currentTick: number) => void, onCancel?: () => void) {
+    this.onRun = onRun;
+    this.onCancel = onCancel;
+  }
+
+  /** 開始（各派生クラスで実装） */
+  abstract start(): void;
+
+  /** 一時停止 */
+  stop() { this.stopped = true; }
+
+  /** 再開 */
+  resume() { this.stopped = false; }
+
+  /** 停止しているか */
+  isStopped(): boolean { return this.stopped }
+
+  /** キャンセル要求 */
+  cancel(force = false) {
+    if (force) this.forceCanceled = true;
+    this.canceled = true;
+  }
+
+  /** タイマー内部キャンセル */
+  protected internalCancel(force = false): CancelResult {
+    if (!this.task) return CancelResult.FAILURE;
+
+    TimerScheduler.removeTask(this.task);
+    this.onCancel?.();
+
+    return force ? CancelResult.FORCE : CancelResult.SUCCESS;
+  }
+}
+
+/* ============================================================
+ * Repeating Timer
+ * ============================================================ */
+
+export interface RepeatingOptions {
+  period?: number;
+  endless?: boolean;
+  silenceOnStop?: boolean;
+  maxElapsedTicks?: number;
+  onFinal?: () => void;
+}
+
+/**
+ * 一定間隔で実行される繰り返しタイマー
+ */
+export class RepeatingTimer extends Timer {
+  private period: number;
+  private endless: boolean;
+  private silenceOnStop: boolean;
+  private maxElapsedTicks?: number;
+  private onFinal?: () => void;
+
+  constructor(
+    onRun?: (currentTick: number) => void,
+    opts: RepeatingOptions = {},
+    onCancel?: () => void
+  ) {
+    super(onRun, onCancel);
+    this.period = opts.period ?? 1;
+    this.endless = opts.endless ?? true;
+    this.silenceOnStop = opts.silenceOnStop ?? true;
+    this.maxElapsedTicks = opts.maxElapsedTicks;
+    this.onFinal = opts.onFinal;
+  }
+
+  /** タイマー開始 */
+  start(): void {
+    this.task = () => {
+      // キャンセル処理
+      if (this.forceCanceled) return this.internalCancel(true);
+      if (this.canceled) return this.internalCancel();
+
+      // 上限チェック
+      if (!this.endless && this.maxElapsedTicks !== undefined &&
+          this.currentTick >= this.maxElapsedTicks) {
+        this.onFinal?.();
+        return this.internalCancel();
+      }
+
+      // 実行タイミング
+      if (this.currentTick % this.period === 0) {
+        if (!this.stopped || (this.stopped && !this.silenceOnStop))
+          this.onRun?.(this.currentTick);
+      }
+
+      if (!this.stopped) this.currentTick++;
+    };
+
+    TimerScheduler.addTask(this.task);
+  }
+}
+
+/* ============================================================
+ * Delayed Timer
+ * ============================================================ */
+
+export interface DelayedOptions {
   delay?: number;
 }
 
+/**
+ * 指定 tick 後に一度だけ実行されるタイマー
+ */
 export class DelayedTimer extends Timer {
-  /**
-   * 静的生成のヘルパー関数
-   * @returns {DelayedTimer}
-   */
-  static run(
-    onRun?: (currentTick: number)=>void,
-    options: DelayedOptions = { delay: 1 },
-    onCancel?: ()=>void
-  ): DelayedTimer {
-    const delayedTimer = new DelayedTimer(onRun, options, onCancel);
-    delayedTimer.start();
-
-    return delayedTimer;
-  }
-
-  private delay?: number;
+  private delay: number;
 
   constructor(
-    onRun?: (currentTick: number)=>void,
-    options: DelayedOptions = { delay: 1 },
-    onCancel?: ()=>void
+    onRun?: (currentTick: number) => void,
+    opts: DelayedOptions = {},
+    onCancel?: () => void
   ) {
     super(onRun, onCancel);
-
-    this.delay = options.delay;
+    this.delay = opts.delay ?? 1;
   }
 
-  /**
-   * 処理開始までのティック
-   * @param delay
-   * @returns {DelayedTimer}
-   */
-  setDelay(delay: number): DelayedTimer {
-    this.delay = delay;
-    return this;
-  }
-
-  /**
-   * @inheritdoc
-   */
   start(): void {
-    this.runnerId = system.runInterval(() => {
-      if (this.flagForForceCancel) this.internalCancel(true);
-      if (this.flagForCancel) this.internalCancel();
+    this.task = () => {
+      if (this.forceCanceled) return this.internalCancel(true);
+      if (this.canceled) return this.internalCancel();
 
-      if (this.currentTick >= (this.delay ?? 0)) {
+      if (this.currentTick >= this.delay) {
         this.onRun?.(this.currentTick);
-        this.internalCancel();
+        return this.internalCancel();
       }
+
       this.currentTick++;
-    }, 1);
+    };
+
+    TimerScheduler.addTask(this.task);
   }
+}
+
+/* =========================================================
+ * シンプル API
+ * ========================================================= */
+
+export function repeating(opts: {
+  every?: number;
+  endless?: boolean;
+  max?: number;
+  silenceWhenStopped?: boolean;
+  run?: (tick: number) => void;
+  cancel?: () => void;
+  final?: () => void;
+  until?: Array<() => boolean>;
+}): RepeatingTimer {
+  const t = new RepeatingTimer(opts.run, opts, opts.cancel);
+  t.start();
+  return t;
+}
+
+export function delayed(
+  ticks: number,
+  run: () => void,
+  cancel?: () => void
+): DelayedTimer {
+  const t = new DelayedTimer(() => run(), { delay: ticks }, cancel);
+  t.start();
+  return t;
+}
+
+/* ============================================================
+ * sleep (Promise)
+ * ============================================================ */
+
+export function sleep(tick: number): Promise<void> {
+  return new Promise((resolve) => {
+    new DelayedTimer(() => resolve(), { delay: tick }).start();
+  });
 }
