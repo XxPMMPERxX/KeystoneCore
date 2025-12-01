@@ -213,7 +213,6 @@ export function repeating(opts: {
   run?: (tick: number) => void;
   cancel?: () => void;
   final?: () => void;
-  until?: Array<() => boolean>;
 }): RepeatingTimer {
   const t = new RepeatingTimer(opts.run, opts, opts.cancel);
   t.start();
