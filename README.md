@@ -8,6 +8,7 @@ Git Clone
 ```bash
 git clone https://github.com/XxPMMPERxX/KeystoneCore.git
 # git clone git@github.com:XxPMMPERxX/KeystoneCore.git
+
 cd KeystoneCore
 ```
 NPM install
@@ -52,3 +53,12 @@ docker compose up
 1. `npm run build`
 1. dev/src 配下でライブラリテスト用コードを書く
 1. `cd dev` 後に `docker compose up` でビルド
+
+### ドキュメント
+- [Event](./DOCUMENT.md#event)
+  - [単一ファイルの場合のサンプル](./DOCUMENT.md#サンプル)
+  - [ファイル分けした場合の推奨サンプル](./DOCUMENT.md#ファイル分けした場合の推奨サンプル)
+- [Timer](./DOCUMENT.md#timer)
+  - [継続処理サンプル](./DOCUMENT.md#継続処理サンプル)
+  - [遅延処理サンプル](./DOCUMENT.md#遅延処理サンプル)
+  - [スリープ処理サンプル](./DOCUMENT.md#スリープ処理サンプル)
