@@ -28,7 +28,8 @@ EventManager.registerAfter('playerSpawn', {
 ```
 
 `registerAfter`及び`registerBefore`の第一引数である`eventName`は、しっかりKeystoneが読み込まれていればクォーテーションを入力したときに利用可能なイベント名の補完が出ます。  
-Priorityは優先度が高い順に`LOWEST > LOW > NORMAL > HIGH > HIGHEST > MONITOR`があります。`MONITOR`が一番最後に処理されます。 引数未指定のデフォルトは`NORMAL`です。 
+Priorityは優先度が高い順に`LOWEST > LOW > NORMAL > HIGH > HIGHEST > MONITOR`があります。`MONITOR`が一番最後に処理されます。 引数未指定のデフォルトは`NORMAL`です。
+<br />
   
 #### ファイル分けした場合の推奨サンプル
 ```ts
@@ -69,9 +70,9 @@ export function registerButtonPushHandlers() {
   });
 }
 ```
+<br />
 
 ## タイマー
-
 #### 継続処理サンプル
 ```ts
 import { Player } from '@minecraft/server';
@@ -103,6 +104,7 @@ timer10s.resume();
 // タイマーの終了
 timer10s.cancel();
 ```
+<br />
 
 #### 遅延処理サンプル
 ```ts
@@ -126,9 +128,13 @@ delayed(1*20, () => player.sendMessage('どうぶつの森'));
 // 即座に処理
 player.sendMessage('街へいこうよ');
 ```
-  
+<br />
+
 #### 待機処理サンプル
 ```ts
+import { Player } from '@minecraft/server';
+import { sleep } from 'keystone';
+
 (async() => {
   player.sendMessage('街へいこうよ');
 
@@ -214,6 +220,7 @@ EventManager.registerAfter('playerSpawn', {
   priority: Priority.LOWEST
 });
 ```
+<br />
 
 ## サンプルコード
 <details>
