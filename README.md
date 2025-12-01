@@ -1,27 +1,28 @@
-# Keystone Core
+# KeystoneCore
 
-## description
-BDS plugin library: Script API base
+## 概要
+BDSのScriptAPIを用いたビヘイビアパックを開発するうえで使える便利な処理をまとめたライブラリのようなもの。
 
-## Keystone Core 開発環境構築
-Git Clone
+## 開発環境構築
+1. リポジトリをクローンする
 ```bash
 git clone https://github.com/XxPMMPERxX/KeystoneCore.git
 # git clone git@github.com:XxPMMPERxX/KeystoneCore.git
 
 cd KeystoneCore
 ```
-NPM install
+2. NPM install
 ```bash
 npm install --force && npm run build
 ```
-Install Dev Server
+3. 開発サーバーのクローン
 ```bash
 git clone https://github.com/XxPMMPERxX/Keystone.git dev
 # git clone git@github.com:XxPMMPERxX/Keystone.git dev
+
 cd dev
 ```
-Edit docker-compose.yml
+4. `docker-compose.yml`を編集
 ```diff
   dev:
     image: node:20.10-alpine
@@ -34,16 +35,16 @@ Edit docker-compose.yml
 +     - "..:/workspace"
 +   entrypoint: sh -c "cd /workspace/dev && npm install --force && npm run build:app"
 ```
-make .env
+5. `.env`ファイルをコピーして生成
 ```bash
 cp .env.example .env
 # edit .env
 ```
-Edit dev/package.json "keystone"
+6. `dev/package.json`の`"keystone"`を編集
 ```package.json
 "keystone": "file:../",
 ```
-start dev server
+7. 開発サーバーの起動
 ```bash
 docker compose up
 ```
@@ -55,10 +56,11 @@ docker compose up
 1. `cd dev` 後に `docker compose up` でビルド
 
 ### ドキュメント
-- [Event](./DOCUMENT.md#event)
+- [イベント](./DOCUMENT.md#イベント)
   - [単一ファイルの場合のサンプル](./DOCUMENT.md#サンプル)
   - [ファイル分けした場合の推奨サンプル](./DOCUMENT.md#ファイル分けした場合の推奨サンプル)
-- [Timer](./DOCUMENT.md#timer)
+- [タイマー](./DOCUMENT.md#タイマー)
   - [継続処理サンプル](./DOCUMENT.md#継続処理サンプル)
   - [遅延処理サンプル](./DOCUMENT.md#遅延処理サンプル)
-  - [スリープ処理サンプル](./DOCUMENT.md#スリープ処理サンプル)
+  - [待機処理サンプル](./DOCUMENT.md#待機処理サンプル)
+- [サンプルコード](./DOCUMENT.md#サンプルコード)

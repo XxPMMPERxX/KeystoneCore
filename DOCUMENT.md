@@ -1,6 +1,6 @@
 # Keystone
 
-## Event
+## イベント
 
 #### 単一ファイルの場合のサンプル
 ```ts
@@ -70,7 +70,7 @@ export function registerButtonPushHandlers() {
 }
 ```
 
-## Timer
+## タイマー
 
 #### 継続処理サンプル
 ```ts
@@ -127,7 +127,7 @@ delayed(1*20, () => player.sendMessage('どうぶつの森'));
 player.sendMessage('街へいこうよ');
 ```
   
-#### スリープ処理サンプル
+#### 待機処理サンプル
 ```ts
 (async() => {
   player.sendMessage('街へいこうよ');
@@ -214,3 +214,80 @@ EventManager.registerAfter('playerSpawn', {
   priority: Priority.LOWEST
 });
 ```
+
+## サンプルコード
+<details>
+
+<summary>ロードを意図的に入れた参加時のタイトルアニメーション (sleep使用)</summary>
+
+```ts
+import { EventManager, Priority, sleep } from 'keystone';
+
+// 参加時のタイトルアニメーション
+EventManager.registerAfter('playerSpawn', {
+  async handler(event) {
+    if (!event.initialSpawn) return;
+    
+    const player = event.player;
+
+    // ここから 「Now loading...」を表示させる処理
+    const wait = Math.floor(Math.random() * 4) + 3; // 3～6秒のランダムなロードを再現
+    let dot = 0;
+    for (let i = 0; i < wait; i++) {
+      if (++dot == 4) dot = 0;
+      player.onScreenDisplay?.setActionBar(`Now loading${'.'.repeat(dot)}`);
+      await sleep(1*20);
+    }
+
+    // タイトルメッセージ
+    let text = '';
+    for (const ch of 'Welcome!') {
+      text += ch;
+      player.onScreenDisplay?.setTitle(text, {
+        fadeInDuration: 0,
+        stayDuration: 1*20,
+        fadeOutDuration: 0
+      });
+
+      player.playSound('note.bit');
+
+      await sleep(2);
+    }
+  },
+  priority: Priority.LOWEST
+});
+```
+
+</details>
+
+<details>
+
+<summary>ボタンを押したときに木材のタイプをカウントダウン後に送信 (sleep使用)</summary>
+
+```ts
+import { Player } from '@minecraft/server';
+import { EventManager, sleep } from 'keystone';
+  
+// ボタンを押したときに何のボタンかをカウントダウン後に送信
+EventManager.registerAfter('buttonPush', {
+  async handler(event) {
+    const button = event.block;
+    const player = event.source;
+    if (!(player instanceof Player)) return;
+    
+    const screen = player.onScreenDisplay;
+    
+    const wait = 3;
+    for (let i = wait; i > 0; i--) {
+      if (screen.isValid) {
+        screen.setActionBar(`${i}秒後にボタンのタイプを送信します`);
+      }
+      await sleep(1*20);
+    }
+
+    player.sendMessage(`${button.typeId}`);
+  }
+});
+```
+
+</details>
