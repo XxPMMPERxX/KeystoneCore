@@ -1,5 +1,5 @@
 import type { Plugin, UserConfig } from 'vite';
-import type { OutputBundle, NormalizedOutputOptions } from 'rollup';
+import type { OutputBundle, NormalizedOutputOptions, OutputChunk, OutputAsset } from 'rollup';
 import { resolve } from 'path';
 import * as crypto from 'node:crypto';
 import * as fs from 'node:fs';
@@ -10,6 +10,7 @@ type PluginConfig = {
   description?: string,
   authors?: string[],
   version?: number[],
+  embedSourceMap?: boolean,
 };
 
 const behaviorPacker = ({
@@ -17,18 +18,23 @@ const behaviorPacker = ({
   uuid,
   description = '',
   authors = [],
-  version = [1, 0, 0]
- }: PluginConfig = {
+  version = [1, 0, 0],
+  embedSourceMap = true,
+}: PluginConfig = {
   name: 'my first plugin',
   description: '',
   authors: [],
-  version: [1, 0, 0]
- }): Plugin => ({
+  version: [1, 0, 0],
+  embedSourceMap: true,
+}): Plugin => ({
   name: 'BehaviorPacker',
+  
   config: (config: UserConfig) => {
     return {
       ...config,
       build: {
+        sourcemap: true,
+        minify: false,
         outDir: './dist_behavior_pack/scripts',
         emptyOutDir: true,
         assetsDir: '',
@@ -45,6 +51,49 @@ const behaviorPacker = ({
       },
     }
   },
+
+  generateBundle(options: NormalizedOutputOptions, bundle: OutputBundle) {
+    if (!embedSourceMap) return;
+
+    // バンドル内のチャンクとソースマップを処理
+    for (const [fileName, file] of Object.entries(bundle)) {
+      if (file.type === 'chunk' && file.map) {
+        const sourceMapData = file.map;
+        
+        const embeddedSourceMap = {
+          version: sourceMapData.version,
+          sources: sourceMapData.sources,
+          sourcesContent: sourceMapData.sourcesContent,
+          mappings: sourceMapData.mappings,
+          names: sourceMapData.names,
+        };
+
+        // ソースマップをグローバル変数として埋め込む
+        const sourceMapEmbed = `// ========== Embedded Source Map ==========
+globalThis.__SOURCE_MAP__ = ${JSON.stringify(embeddedSourceMap)};
+// ========== End of Embedded Source Map ==========
+
+`;
+
+        // コードを修正
+        const originalCode = file.code;
+        const modifiedCode = sourceMapEmbed + originalCode;
+        // 外部ソースマップURLコメントを削除
+        file.code = modifiedCode.replace(/\/\/# sourceMappingURL=.+$/gm, '');
+        
+        // ソースマップファイルを削除（埋め込み済みなので不要）
+        file.map = null;
+      }
+    }
+
+    // .mapファイルを削除
+    for (const fileName in bundle) {
+      if (fileName.endsWith('.map')) {
+        delete bundle[fileName];
+      }
+    }
+  },
+
   writeBundle: async (_options: NormalizedOutputOptions, bundle: OutputBundle) => {
     const entryFile = Object.values(bundle).find(
       (file) => file.type === 'chunk' && file.isEntry
@@ -71,12 +120,12 @@ const behaviorPacker = ({
           "language": "javascript",
           "uuid": crypto.randomUUID(),
           "version": [1, 0, 0],
-          "entry": entryFile.type === 'chunk' ? `scripts/${entryFile.fileName}` : '',
+          "entry": `scripts/${entryFile.fileName}`,
         }
       ],
       "dependencies": [
         {
-          "module_name":"@minecraft/server",
+          "module_name": "@minecraft/server",
           "version": "beta"
         },
         {
