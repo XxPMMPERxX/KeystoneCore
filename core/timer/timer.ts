@@ -214,7 +214,14 @@ export function repeating(opts: {
   cancel?: () => void;
   final?: () => void;
 }): RepeatingTimer {
-  const t = new RepeatingTimer(opts.run, opts, opts.cancel);
+  const options = {
+    period: opts.every,
+    endless: opts.endless,
+    silenceOnStop: opts.silenceWhenStopped,
+    maxElapsedTicks: opts.max,
+    onFinal: opts.final
+  };
+  const t = new RepeatingTimer(opts.run, options, opts.cancel);
   t.start();
   return t;
 }
