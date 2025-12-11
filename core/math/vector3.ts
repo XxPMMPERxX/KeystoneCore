@@ -268,6 +268,66 @@ export class Vector3 {
     );
   }
 
+    /**
+   * X座標をxValueにしたとき線分上に存在する点を返す
+   * @param end 終点
+   * @param xValue 途中点のX値
+   * @returns {Vector3 | undefined}
+   */
+  getIntermediateWithXValue(end: Vector3, xValue: number): Vector3 | undefined {
+    const dx = end.x - this.x;
+    if (dx === 0) return;
+
+    const t = (xValue - this.x) / dx;
+    if (t < 0 || t > 1) return;
+
+    return new Vector3(
+      this.x + dx * t,
+      this.y + (end.y - this.y) * t,
+      this.z + (end.z - this.z) * t
+    );
+  }
+
+  /**
+   * Y座標をyValueにしたとき線分上に存在する点を返す
+   * @param end 終点
+   * @param yValue 途中点のY値
+   * @returns {Vector3 | undefined}
+   */
+  getIntermediateWithYValue(end: Vector3, yValue: number): Vector3 | undefined {
+    const dy = end.y - this.y;
+    if (dy === 0) return;
+
+    const t = (yValue - this.y) / dy;
+    if (t < 0 || t > 1) return;
+
+    return new Vector3(
+      this.x + (end.x - this.x) * t,
+      this.y + dy * t,
+      this.z + (end.z - this.z) * t
+    );
+  }
+
+  /**
+   * Z座標をzValueにしたとき線分上に存在する点を返す
+   * @param end 終点
+   * @param zValue 途中点のZ値
+   * @returns {Vector3 | undefined}
+   */
+  getIntermediateWithZValue(end: Vector3, zValue: number): Vector3 | undefined {
+    const dz = end.z - this.z;
+    if (dz === 0) return;
+
+    const t = (zValue - this.z) / dz;
+    if (t < 0 || t > 1) return;
+
+    return new Vector3(
+      this.x + (end.x - this.x) * t,
+      this.y + (end.y - this.y) * t,
+      this.z + dz * t
+    );
+  }
+
   /**
    * BDS ScriptAPIで使える {x, y, z} 形式に変換
    * @returns {_Vector3}
