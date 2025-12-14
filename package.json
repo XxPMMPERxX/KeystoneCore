@@ -1,5 +1,5 @@
 {
-  "name": "@gollilla/keystone",
+  "name": "keystonemc",
   "version": "1.0.0",
   "description": "ScriptAPI Wrapper",
   "type": "module",
