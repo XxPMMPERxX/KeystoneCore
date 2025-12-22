@@ -21,43 +21,66 @@ export class Vector3 {
 
   /**
    * {x, y, z} オブジェクトから生成
-   * @param {_Vector3} pos 
-   * @returns 
+   * @param pos 
+   * @returns {Vector3}
    */
   static fromBDS(pos: _Vector3): Vector3 {
     return new Vector3(pos.x, pos.y, pos.z);
   }
 
-  // ===== 基本ゲッター =====
+  /**
+   * x
+   * @returns {number}
+   */
   getX(): number { 
     return this.x;
   }
 
+  /**
+   * y
+   * @returns {number}
+   */
   getY(): number {
     return this.y;
   }
 
+  /**
+   * z
+   * @returns {number}
+   */
   getZ(): number {
     return this.z;
   }
 
+  /**
+   * x (整数値)
+   * @returns {number}
+   */
   getFloorX(): number {
     return Math.floor(this.x);
   }
 
+  /**
+   * y (整数値)
+   * @returns {number}
+   */
   getFloorY(): number {
     return Math.floor(this.y);
   }
 
+  /**
+   * z (整数値)
+   * @returns {number}
+   */
   getFloorZ(): number {
     return Math.floor(this.z);
   }
 
   /**
    * 加算
-   * @param {number} x 
-   * @param {number} y 
-   * @param {number} z 
+   * @param x 
+   * @param y 
+   * @param z 
    * @return {Vector3}
    */
   add(x: number, y: number, z: number): Vector3 {
@@ -70,7 +93,7 @@ export class Vector3 {
 
   /**
    * ベクトル単位での加算
-   * @param {_Vector3} v 
+   * @param v 
    * @returns {Vector3}
    */
   addVector(v: _Vector3): Vector3 {
@@ -79,9 +102,9 @@ export class Vector3 {
 
   /**
    * 減算
-   * @param {number} x
-   * @param {number} y
-   * @param {number} z
+   * @param x
+   * @param y
+   * @param z
    * @return {Vector3}
    */
   subtract(x: number, y: number, z: number): Vector3 {
@@ -90,7 +113,7 @@ export class Vector3 {
 
   /**
    * ベクトル単位での減算
-   * @param {_Vector3} v
+   * @param v
    * @return {Vector3}
    */
   subtractVector(v: _Vector3): Vector3 {
@@ -99,7 +122,7 @@ export class Vector3 {
 
   /**
    * 乗算
-   * @param {number} value
+   * @param value
    * @return {Vector3}
    */
   multiply(value: number): Vector3 {
@@ -112,7 +135,7 @@ export class Vector3 {
 
   /**
    * 除算
-   * @param {number} value
+   * @param value
    * @return {Vector3}
    */
   divide(value: number): Vector3 {
@@ -149,7 +172,7 @@ export class Vector3 {
 
   /**
    * ベクトルの内部数値小数点四捨五入
-   * @param {number} precision
+   * @param precision
    * @return {Vector3}
    */
   round(precision: number = 0): Vector3 {
@@ -175,7 +198,7 @@ export class Vector3 {
 
   /**
    * 指定した2点間のユークリッド距離
-   * @param {_Vector3} pos 
+   * @param pos 
    * @return {number}
    */
   distance(pos: _Vector3): number {
@@ -184,7 +207,7 @@ export class Vector3 {
 
   /**
    * 指定した2点間のユークリッド距離の2乗
-   * @param {_Vector3} pos 
+   * @param pos 
    * @return {number}
    */
   distanceSquared(pos: _Vector3): number {
@@ -196,7 +219,7 @@ export class Vector3 {
 
   /**
    * 内積
-   * @param {_Vector3} pos 
+   * @param pos 
    * @return {number}
    */
   dot(pos: _Vector3): number {
@@ -205,7 +228,7 @@ export class Vector3 {
 
   /**
    * 外積
-   * @param {_Vector3} pos 
+   * @param pos 
    * @return {Vector3}
    */
   cross(pos: _Vector3): Vector3 {
@@ -218,7 +241,7 @@ export class Vector3 {
 
   /**
    * ベクトルの比較
-   * @param {_Vector3} pos 
+   * @param pos 
    * @return {boolean}
    */
   equals(pos: _Vector3): boolean {
@@ -255,9 +278,9 @@ export class Vector3 {
 
   /**
    * オブジェクトの数値指定再生成
-   * @param {number} x 
-   * @param {number} y 
-   * @param {number} z 
+   * @param x 
+   * @param y 
+   * @param z 
    * @return {Vector3}
    */
   withComponents(x?: number, y?: number, z?: number): Vector3 {
@@ -272,7 +295,7 @@ export class Vector3 {
    * X座標をxValueにしたとき線分上に存在する点を返す
    * @param end 終点
    * @param xValue 途中点のX値
-   * @returns {Vector3 | undefined}
+   * @returns {Vector3|undefined}
    */
   getIntermediateWithXValue(end: Vector3, xValue: number): Vector3 | undefined {
     const dx = end.x - this.x;
@@ -292,7 +315,7 @@ export class Vector3 {
    * Y座標をyValueにしたとき線分上に存在する点を返す
    * @param end 終点
    * @param yValue 途中点のY値
-   * @returns {Vector3 | undefined}
+   * @returns {Vector3|undefined}
    */
   getIntermediateWithYValue(end: Vector3, yValue: number): Vector3 | undefined {
     const dy = end.y - this.y;
@@ -312,7 +335,7 @@ export class Vector3 {
    * Z座標をzValueにしたとき線分上に存在する点を返す
    * @param end 終点
    * @param zValue 途中点のZ値
-   * @returns {Vector3 | undefined}
+   * @returns {Vector3|undefined}
    */
   getIntermediateWithZValue(end: Vector3, zValue: number): Vector3 | undefined {
     const dz = end.z - this.z;
@@ -336,19 +359,25 @@ export class Vector3 {
     return { x: this.x, y: this.y, z: this.z };
   }
 
-  /** 通常のオブジェクトに変換 */
+  /** 
+   * オブジェクトに変換
+   */
   toObject(): {x: number; y: number; z: number} {
     return { x: this.x, y: this.y, z: this.z };
   }
 
+  /**
+   * toString
+   * @returns {string}
+   */
   toString(): string {
     return `_Vector3(x=${this.x}, y=${this.y}, z=${this.z})`;
   }
 
   /**
    * 最大点
-   * @param {_Vector3} vector
-   * @param {_Vector3[]} vectors 
+   * @param vector
+   * @param vectors 
    * @returns {Vector3}
    */
   static maxComponents(
@@ -368,8 +397,8 @@ export class Vector3 {
 
   /**
    * 最小点
-   * @param {_Vector3} vector
-   * @param {_Vector3[]} vectors 
+   * @param vector
+   * @param vectors 
    * @returns {Vector3}
    */
   static minComponents(
@@ -389,7 +418,7 @@ export class Vector3 {
 
   /**
    * 合計
-   * @param {_Vector3[]} vectors
+   * @param vectors
    * @returns {Vector3}
    */
   static sum(...vectors: {x: number; y: number; z: number}[]): Vector3 {
