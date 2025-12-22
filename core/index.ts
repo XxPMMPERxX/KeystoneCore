@@ -1,5 +1,6 @@
 export { keystone } from './keystone';
 export { Vector3 } from './math/vector3';
+export { AxisAlignedBB } from './math/axisAlignedBB';
 export { Priority } from './event/priority';
 export { EventManager } from './event/eventManager';
 export { debug } from './utils/debugger';
