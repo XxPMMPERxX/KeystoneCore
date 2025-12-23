@@ -1,11 +1,8 @@
 import { system } from "@minecraft/server";
 
 /**
- * ============================================================
- * マスター Interval（負荷分散スケジューラ）
- * ============================================================
+ * マスターInterval (負荷分散スケジューラ)
  */
-
 export class TimerScheduler {
   private static tasks: Set<() => void> = new Set();
   private static tick = 0;
@@ -49,10 +46,7 @@ enum CancelResult {
 }
 
 /**
- * ============================================================
  * Base Timer
- * ============================================================
- * スケジューラに登録され、tick ごとに管理される抽象クラス
  */
 abstract class Timer {
   protected currentTick = 0;
@@ -99,10 +93,9 @@ abstract class Timer {
   }
 }
 
-/* ============================================================
- * Repeating Timer
- * ============================================================ */
-
+/**
+ * RepeatingTimerのオプション
+ */
 export interface RepeatingOptions {
   period?: number;
   endless?: boolean;
@@ -161,10 +154,9 @@ export class RepeatingTimer extends Timer {
   }
 }
 
-/* ============================================================
- * Delayed Timer
- * ============================================================ */
-
+/**
+ * DelayedTimerのオプション
+ */
 export interface DelayedOptions {
   delay?: number;
 }
@@ -201,10 +193,11 @@ export class DelayedTimer extends Timer {
   }
 }
 
-/* =========================================================
- * シンプル API
- * ========================================================= */
-
+/**
+ * RepeatingTimerのシンプルAPI
+ * @param opts
+ * @returns {RepeatingTimer}
+ */
 export function repeating(opts: {
   every?: number;
   endless?: boolean;
@@ -226,6 +219,11 @@ export function repeating(opts: {
   return t;
 }
 
+/**
+ * DelayedTimerのシンプルAPI
+ * @param opts
+ * @returns {DelayedTimer}
+ */
 export function delayed(
   ticks: number,
   run: () => void,
@@ -236,10 +234,11 @@ export function delayed(
   return t;
 }
 
-/* ============================================================
- * sleep (Promise)
- * ============================================================ */
-
+/**
+ * sleep (async)
+ * @param tick
+ * @returns {Promise<void>}
+ */
 export function sleep(tick: number): Promise<void> {
   return new Promise((resolve) => {
     new DelayedTimer(() => resolve(), { delay: tick }).start();
