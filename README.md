@@ -15,45 +15,17 @@ cd KeystoneCore
 ```bash
 npm install --force && npm run build
 ```
-3. 開発サーバーのクローン
-```bash
-git clone https://github.com/XxPMMPERxX/Keystone.git dev
-# git clone git@github.com:XxPMMPERxX/Keystone.git dev
 
-cd dev
-```
-4. `docker-compose.yml`を編集
-```diff
-  dev:
-    image: node:20.10-alpine
--   working_dir: /app
--   volumes:
--     - ".:/app"
--   entrypoint: sh -c "npm install --force && npm run build:app"
-+   working_dir: /workspace/dev
-+   volumes:
-+     - "..:/workspace"
-+   entrypoint: sh -c "cd /workspace/dev && npm install --force && npm run build:app"
-```
-5. `.env`ファイルをコピーして生成
-```bash
-cp .env.example .env
-# edit .env
-```
-6. `dev/package.json`の`"keystone"`を編集
-```package.json
-"keystone": "file:../",
-```
-7. 開発サーバーの起動
-```bash
-docker compose up
-```
 
 ### 開発手順
-1. core/ 配下でライブラリを作成
-1. `npm run build`
-1. dev/src 配下でライブラリテスト用コードを書く
-1. `cd dev` 後に `docker compose up` でビルド
+1. feature/* 等で新しく作業ブランチを切る
+1. core/ 配下でライブラリを更新
+1. キリが良いところで push する
+1. 動作確認は以下
+    1. keystone側で package.json の dependencies を書き換え
+    1. `"keystonemc": "github:XxPMMPERxX/KeystoneCore#<ブランチ名>"`
+    1. 'npm install -f keystonemc` を実行するとブランチの最新の状態でインストールされる
+
 
 ### ドキュメント
 - [イベント](./DOCUMENT.md#イベント)
