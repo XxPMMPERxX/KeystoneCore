@@ -22,77 +22,89 @@ export type BeforeEventMap = {
 type AfterEventName = keyof AfterEventMap;
 type BeforeEventName = keyof BeforeEventMap;
 
-export class EventManager {
-  // Partial を使って never 問題を回避（各キー毎の型情報を保持）
-  private static afterListeners: Partial<{ [K in AfterEventName]: Listener<AfterEventMap[K]>[] }> = {};
-  private static beforeListeners: Partial<{ [K in BeforeEventName]: Listener<BeforeEventMap[K]>[] }> = {};
+// Partial を使って never 問題を回避（各キー毎の型情報を保持）
+const afterListeners: Partial<{ [K in AfterEventName]: Listener<AfterEventMap[K]>[] }> = {};
+const beforeListeners: Partial<{ [K in BeforeEventName]: Listener<BeforeEventMap[K]>[] }> = {};
 
-  /** init: world.beforeEvents / world.afterEvents を全自動で subscribe して dispatch に流す */
-  static initialize() {
-    // afterEvents
-    for (const name in world.afterEvents) {
-      (world.afterEvents as any)[name].subscribe((ev: any) => {
-        EventManager.dispatchAfter(name as AfterEventName, ev);
-      });
-    }
+// world.beforeEvents / world.afterEvents を全自動で subscribe して dispatch に流す
+// afterEvents
+for (const name in world.afterEvents) {
+  const eventName = name as AfterEventName;
+  const eventSignal = world.afterEvents[eventName];
+  eventSignal.subscribe((ev) => {
+    dispatchAfter(eventName, ev);
+  });
+}
 
-    // beforeEvents
-    for (const name in world.beforeEvents) {
-      (world.beforeEvents as any)[name].subscribe((ev: any) => {
-        EventManager.dispatchBefore(name as BeforeEventName, ev);
-      });
-    }
+// beforeEvents
+for (const name in world.beforeEvents) {
+  const eventName = name as BeforeEventName;
+  const eventSignal = world.beforeEvents[eventName];
+  eventSignal.subscribe((ev) => {
+    dispatchBefore(eventName, ev);
+  });
+}
+
+// ---------- register ----------
+function registerAfter<K extends AfterEventName>(eventName: K, listener: Listener<AfterEventMap[K]>) {
+  if (!afterListeners[eventName]) {
+    afterListeners[eventName] = [];
   }
+  const arr = afterListeners[eventName]!;
+  arr.push(listener as Listener<any>);
+  arr.sort((a, b) => (b.priority ?? Priority.NORMAL) - (a.priority ?? Priority.NORMAL));
+}
 
-  // ---------- register ----------
-  static registerAfter<K extends AfterEventName>(eventName: K, listener: Listener<AfterEventMap[K]>) {
-    if (!this.afterListeners[eventName]) {
-      this.afterListeners[eventName] = [];
-    }
-    const arr = this.afterListeners[eventName]!;
-    arr.push(listener as Listener<any>);
-    arr.sort((a, b) => (b.priority ?? Priority.NORMAL) - (a.priority ?? Priority.NORMAL));
+function registerBefore<K extends BeforeEventName>(eventName: K, listener: Listener<BeforeEventMap[K]>) {
+  if (!beforeListeners[eventName]) {
+    beforeListeners[eventName] = [];
   }
+  const arr = beforeListeners[eventName]!;
+  arr.push(listener as Listener<any>);
+  arr.sort((a, b) => (b.priority ?? Priority.NORMAL) - (a.priority ?? Priority.NORMAL));
+}
 
-  static registerBefore<K extends BeforeEventName>(eventName: K, listener: Listener<BeforeEventMap[K]>) {
-    if (!this.beforeListeners[eventName]) {
-      this.beforeListeners[eventName] = [];
+// ---------- dispatch ----------
+function dispatchAfter<K extends AfterEventName>(eventName: K, event: AfterEventMap[K]) {
+  const arr = afterListeners[eventName];
+  if (!arr) return;
+  for (const listener of arr) {
+    try {
+      listener.handler(event as any);
+    } catch (e) {
+      // エラーは個別に捕捉して続行（必要ならログ機構を入れてください）
+      console.error(`[EventManager] after:${String(eventName)} handler threw:`, e);
     }
-    const arr = this.beforeListeners[eventName]!;
-    arr.push(listener as Listener<any>);
-    arr.sort((a, b) => (b.priority ?? Priority.NORMAL) - (a.priority ?? Priority.NORMAL));
-  }
-
-  // ---------- dispatch ----------
-  private static dispatchAfter<K extends AfterEventName>(eventName: K, event: AfterEventMap[K]) {
-    const arr = this.afterListeners[eventName];
-    if (!arr) return;
-    for (const listener of arr) {
-      try {
-        listener.handler(event as any);
-      } catch (e) {
-        // エラーは個別に捕捉して続行（必要ならログ機構を入れてください）
-        console.error(`[EventManager] after:${String(eventName)} handler threw:`, e);
-      }
-    }
-  }
-
-  private static dispatchBefore<K extends BeforeEventName>(eventName: K, event: BeforeEventMap[K]) {
-    const arr = this.beforeListeners[eventName];
-    if (!arr) return;
-    for (const listener of arr) {
-      try {
-        listener.handler(event as any);
-      } catch (e) {
-        console.error(`[EventManager] before:${String(eventName)} handler threw:`, e);
-      }
-    }
-  }
-
-  // ---------- utility ----------
-  /** 登録済みリスナーを全部クリア（Plugin 単位で実装するなら拡張する） */
-  private static clearAll() {
-    this.afterListeners = {};
-    this.beforeListeners = {};
   }
 }
+
+function dispatchBefore<K extends BeforeEventName>(eventName: K, event: BeforeEventMap[K]) {
+  const arr = beforeListeners[eventName];
+  if (!arr) return;
+  for (const listener of arr) {
+    try {
+      listener.handler(event as any);
+    } catch (e) {
+      console.error(`[EventManager] before:${String(eventName)} handler threw:`, e);
+    }
+  }
+}
+
+// ---------- utility ----------
+/** 登録済みリスナーを全部クリア（Plugin 単位で実装するなら拡張する） */
+function clearAllListeners() {
+  for (const key in afterListeners) {
+    delete afterListeners[key as AfterEventName];
+  }
+  for (const key in beforeListeners) {
+    delete beforeListeners[key as BeforeEventName];
+  }
+}
+
+// ---------- namespace object ----------
+/** EventManager オブジェクトとしてまとめてエクスポート */
+export const EventManager = {
+  registerAfter,
+  registerBefore,
+  clearAllListeners
+};

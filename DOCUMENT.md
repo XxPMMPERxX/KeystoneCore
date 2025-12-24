@@ -7,9 +7,6 @@
 import { Player } from '@minecraft/server';
 import { EventManager, Priority } from 'keystone';
 
-// 一回限りのおまじない
-EventManager.initialize();
-
 // 例:プレイヤーがスポーンした時
 EventManager.registerAfter('playerSpawn', {
   handler(event) {
@@ -34,12 +31,9 @@ Priorityは優先度が高い順に`LOWEST > LOW > NORMAL > HIGH > HIGHEST > MON
 #### ファイル分けした場合の推奨サンプル
 ```ts
 // --------------------- index.ts ---------------------
-import { EventManager } from 'keystone';
+import 'keystone'; // イベントシステムの初期化
 import { registerPlayerSpawnHandlers } from './playerSpawn';
 import { registerButtonPushHandlers } from './buttonPush';
-
-
-EventManager.initialize();
 
 registerPlayerSpawnHandlers();
 registerButtonPushHandlers();
@@ -155,9 +149,9 @@ EventManager.registerAfter('buttonPush', {
   async handler(event) {
     const player = event.source;
     if (!(player instanceof Player)) return;
-    
+
     const screen = player.onScreenDisplay;
-    
+
     // forとsleepを駆使して継続処理を再現
     for (let i = 3; i > 0; i--) {
       if (screen.isValid) {
@@ -205,7 +199,7 @@ EventManager.registerAfter('playerSpawn', {
   }
 });
 ```
-基本的にクライアント側の読み込みが関わってくる処理は全て同期的に行うことをおすすめします。  
+基本的にクライアント側の読み込みが関わってくる処理は全て同期的に行うことをおすすめします。
 例えば上のプログラムはTimerを用いて書き換えられます。
 ```ts
 EventManager.registerAfter('playerSpawn', {
@@ -234,7 +228,7 @@ import { EventManager, Priority, sleep } from 'keystone';
 EventManager.registerAfter('playerSpawn', {
   async handler(event) {
     if (!event.initialSpawn) return;
-    
+
     const player = event.player;
 
     // ここから 「Now loading...」を表示させる処理
@@ -274,16 +268,16 @@ EventManager.registerAfter('playerSpawn', {
 ```ts
 import { Player } from '@minecraft/server';
 import { EventManager, sleep } from 'keystone';
-  
+
 // ボタンを押したときに何のボタンかをカウントダウン後に送信
 EventManager.registerAfter('buttonPush', {
   async handler(event) {
     const button = event.block;
     const player = event.source;
     if (!(player instanceof Player)) return;
-    
+
     const screen = player.onScreenDisplay;
-    
+
     const wait = 3;
     for (let i = wait; i > 0; i--) {
       if (screen.isValid) {
