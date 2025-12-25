@@ -158,7 +158,7 @@ class SourceMapDebugger {
     if (best && this.sourceMap.sources?.[best.sourceIndex]) {
       return {
         source: this.sourceMap.sources[best.sourceIndex],
-        line: best.originalLine,
+        line: best.originalLine + 1, // ソースマップは0-indexedなので1を足す
         column: best.originalColumn,
         content: this.sourceMap.sourcesContent?.[best.sourceIndex],
         name: best.name,
@@ -181,12 +181,13 @@ class SourceMapDebugger {
       let position: ReturnType<typeof this.getOriginalPosition> = null;
 
       // スタックからファイル・行・列を解析
+      const offset = (this.sourceMap?._offset as number) || 0;
       for (let i = 2; i < Math.min(stackLines.length, 8); i++) {
         const line = stackLines[i];
-        console.log(JSON.stringify(line));
         const match = /(?:\()?(?:[A-Za-z0-9._/-]+):(\d+)(?::(\d+))?\)?$/.exec(line);
         if (match) {
-          const lineNum = parseInt(match[1]);
+          const rawLineNum = parseInt(match[1]);
+          const lineNum = rawLineNum - offset; // 埋め込みコードのオフセットを補正
           const colNum = match[2] ? parseInt(match[2]) : undefined;
           position = this.getOriginalPosition(lineNum, colNum);
           if (position) break;
