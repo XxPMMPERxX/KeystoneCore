@@ -5,6 +5,6 @@ export { AxisAlignedBB } from './math/axisAlignedBB';
 export { Priority } from './event/priority';
 export { EventManager } from './event/eventManager';
 export type { AfterEventMap, BeforeEventMap } from './event/eventManager';
-export { RepeatingTimer, DelayedTimer, repeating, delayed, sleep } from './timer/timer';
+export { RepeatingTimer, DelayedTimer, repeating, delayed, sleep, until, waitUntil } from './timer/timer';
 export { BaseForm, BaseActionForm, BaseModalForm, BaseMessageForm } from './form/baseForm';
 export { Button, TextField, Dropdown, Toggle, Slider } from './form/elements';
