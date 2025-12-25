@@ -66,6 +66,7 @@ const behaviorPacker = ({
           sourcesContent: sourceMapData.sourcesContent,
           mappings: sourceMapData.mappings,
           names: sourceMapData.names,
+          _offset: 4, // 埋め込みコードで追加される行数（4行）
         };
 
         // ソースマップをグローバル変数として埋め込む
