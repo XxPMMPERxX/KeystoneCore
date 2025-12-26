@@ -159,7 +159,7 @@ class SourceMapDebugger {
       return {
         source: this.sourceMap.sources[best.sourceIndex],
         line: best.originalLine + 1, // ソースマップは0-indexedなので1を足す
-        column: best.originalColumn,
+        column: best.originalColumn + 1, // ソースマップは0-indexedなので1を足す
         content: this.sourceMap.sourcesContent?.[best.sourceIndex],
         name: best.name,
       };
@@ -175,6 +175,7 @@ class SourceMapDebugger {
       const stackLines = stack.split('\n');
 
       const output: string[] = [];
+      output.push('');
       output.push(`${COLOR.yellow}━━━━━━━━━━━━━━━━━━━━━━${COLOR.reset}`);
       output.push(`${COLOR.bold}${COLOR.cyan}📍 DEBUG${COLOR.reset}`);
 
@@ -195,7 +196,7 @@ class SourceMapDebugger {
       }
 
       if (position) {
-        const file = position.source.replace(/^.*\//, '');
+        const file = position.source;
         output.push(`${COLOR.blue}📄 ${file}:${position.line}:${position.column}${COLOR.reset}`);
         if (position.name) output.push(`${COLOR.cyan}🏷 ${position.name}${COLOR.reset}`);
 
