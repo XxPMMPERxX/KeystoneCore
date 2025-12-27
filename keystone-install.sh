@@ -150,10 +150,32 @@ clone_keystone() {
         fi
         
         # macOS/LinuxでのUID/GID設定
-        echo "" >> "$INSTALL_DIR/.env"
-        echo "# User ID設定" >> "$INSTALL_DIR/.env"
-        echo "UID=$(id -u)" >> "$INSTALL_DIR/.env"
-        echo "GID=$(id -g)" >> "$INSTALL_DIR/.env"
+        CURRENT_UID=$(id -u)
+        CURRENT_GID=$(id -g)
+
+        # UIDが既に存在する場合は置き換え、存在しない場合は追加
+        if grep -q "^UID=" "$INSTALL_DIR/.env"; then
+            sed -i.bak "s/^UID=.*/UID=$CURRENT_UID/" "$INSTALL_DIR/.env"
+        else
+            echo "" >> "$INSTALL_DIR/.env"
+            echo "# User ID設定" >> "$INSTALL_DIR/.env"
+            echo "UID=$CURRENT_UID" >> "$INSTALL_DIR/.env"
+        fi
+
+        # GIDが既に存在する場合は置き換え、存在しない場合は追加
+        if grep -q "^GID=" "$INSTALL_DIR/.env"; then
+            sed -i.bak "s/^GID=.*/GID=$CURRENT_GID/" "$INSTALL_DIR/.env"
+        else
+            # UIDがすでに追加されている場合はコメントを追加しない
+            if ! grep -q "# User ID設定" "$INSTALL_DIR/.env"; then
+                echo "" >> "$INSTALL_DIR/.env"
+                echo "# User ID設定" >> "$INSTALL_DIR/.env"
+            fi
+            echo "GID=$CURRENT_GID" >> "$INSTALL_DIR/.env"
+        fi
+
+        # バックアップファイルを削除
+        rm -f "$INSTALL_DIR/.env.bak"
     else
         echo -e "${RED}エラー: リポジトリのクローンに失敗しました${NC}"
         exit 1
