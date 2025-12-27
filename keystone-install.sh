@@ -176,6 +176,24 @@ clone_keystone() {
 
         # バックアップファイルを削除
         rm -f "$INSTALL_DIR/.env.bak"
+
+        # template配下をworlds/DevWorld配下にコピー（既存ファイルは上書きしない）
+        if [ -d "$INSTALL_DIR/template" ]; then
+            echo -e "${GREEN}テンプレートファイルをDevWorldにコピーしています...${NC}"
+            mkdir -p "$INSTALL_DIR/worlds/DevWorld"
+
+            # macOSとLinuxで動作する方法でコピー
+            for file in "$INSTALL_DIR/template"/*; do
+                if [ -e "$file" ]; then
+                    filename=$(basename "$file")
+                    if [ ! -e "$INSTALL_DIR/worlds/DevWorld/$filename" ]; then
+                        cp -r "$file" "$INSTALL_DIR/worlds/DevWorld/"
+                    fi
+                fi
+            done
+
+            echo -e "${GREEN}テンプレートファイルのコピーが完了しました${NC}"
+        fi
     else
         echo -e "${RED}エラー: リポジトリのクローンに失敗しました${NC}"
         exit 1
