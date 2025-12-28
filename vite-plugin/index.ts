@@ -133,14 +133,6 @@ globalThis.__SOURCE_MAP__ = ${JSON.stringify(embeddedSourceMap)};
           "module_name": "@minecraft/server-ui",
           "version": "beta"
         },
-        {
-          "module_name": "@minecraft/vanilla-data",
-          "version": "1.21.131"
-        },
-        {
-          "module_name": "@minecraft/math",
-          "version": "2.2.11"
-        },
       ],
       "metadata": {
         "authors": authors,
