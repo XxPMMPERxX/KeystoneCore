@@ -25,7 +25,8 @@
   "devDependencies": {
     "@eslint/js": "^9.38.0",
     "@minecraft/server": "^2.5.0-beta.1.21.130-preview.24",
-    "@minecraft/server-net": "^1.0.0-beta.1.21.130-preview.24",
+    "@minecraft/vanilla-data": "^1.21.131",
+    "@minecraft/math": "^2.2.11",
     "@minecraft/server-ui": "^2.1.0-beta.1.21.130-preview.24",
     "@types/node": "^24.9.2",
     "eslint": "^9.38.0",
