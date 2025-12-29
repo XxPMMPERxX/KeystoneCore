@@ -127,11 +127,11 @@ globalThis.__SOURCE_MAP__ = ${JSON.stringify(embeddedSourceMap)};
       "dependencies": [
         {
           "module_name": "@minecraft/server",
-          "version": "beta"
+          "version": "2.4.0"
         },
         {
           "module_name": "@minecraft/server-ui",
-          "version": "beta"
+          "version": "2.0.0"
         },
       ],
       "metadata": {
