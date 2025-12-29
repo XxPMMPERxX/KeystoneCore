@@ -10,7 +10,7 @@
    ```
 2. NPM install
     ```bash
-    npm install --force && npm run build
+    npm install && npm run build
     ```
 <br />
 
@@ -21,4 +21,4 @@
 1. 動作確認は以下
     1. keystone側で package.json の dependencies を書き換え
     1. `"keystonemc": "github:XxPMMPERxX/KeystoneCore#<ブランチ名>"`
-    1. `npm install -f keystonemc` を実行するとブランチの最新の状態でインストールされる
+    1. `npm install keystonemc` を実行するとブランチの最新の状態でインストールされる
