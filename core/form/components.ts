@@ -10,14 +10,14 @@ import { ActionButton, FormComponent } from './types';
 export function toggle(opts: {
   label: string;
   default: boolean;
-  handler(player: Player, value: boolean): void;
+  handler?(player: Player, value: boolean): void;
 }): FormComponent<boolean> {
   return {
     render(form: ModalFormData) {
       form.toggle(opts.label, { defaultValue: opts.default });
     },
     handle(player, value) {
-      opts.handler(player, value);
+      opts.handler?.(player, value);
     }
   };
 }
@@ -31,7 +31,7 @@ export function textField(opts: {
   label: string;
   placeholder?: string;
   default?: string;
-  handler(player: Player, value: string): void;
+  handler?(player: Player, value: string): void;
 }): FormComponent<string> {
   return {
     render(form: ModalFormData) {
@@ -42,7 +42,7 @@ export function textField(opts: {
       );
     },
     handle(player, value) {
-      opts.handler(player, value);
+      opts.handler?.(player, value);
     }
   };
 }
@@ -58,7 +58,7 @@ export function slider(opts: {
   max: number;
   step?: number;
   default: number;
-  handler(player: Player, value: number): void;
+  handler?(player: Player, value: number): void;
 }): FormComponent<number> {
   return {
     render(form: ModalFormData) {
@@ -70,7 +70,7 @@ export function slider(opts: {
       );
     },
     handle(player, value) {
-      opts.handler(player, value);
+      opts.handler?.(player, value);
     }
   };
 }
@@ -84,7 +84,7 @@ export function dropdown(opts: {
   label: string;
   options: string[];
   defaultIndex?: number;
-  handler(player: Player, value: number): void;
+  handler?(player: Player, value: number): void;
 }): FormComponent<number> {
   return {
     render(form: ModalFormData) {
@@ -95,7 +95,7 @@ export function dropdown(opts: {
       );
     },
     handle(player, value) {
-      opts.handler(player, value);
+      opts.handler?.(player, value);
     }
   };
 }
