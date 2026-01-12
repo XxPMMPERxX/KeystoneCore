@@ -3,6 +3,7 @@ export { debug } from './utils/debugger';
 export { Vector3 } from './math/vector3';
 export { AxisAlignedBB } from './math/axisAlignedBB';
 export { EventManager } from './event/eventManager';
+export { Priority } from './event/types';
 export type { AfterEventMap, BeforeEventMap } from './event/eventManager';
 export * from './timer/timer';
 export * from './form/modalForm';
