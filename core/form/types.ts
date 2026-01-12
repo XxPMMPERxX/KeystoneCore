@@ -7,13 +7,14 @@ import { MessageForm } from './messageForm';
 
 export interface FormComponent<T = any> {
   render(form: ModalFormData): void;
-  handle(player: Player, value: T): void;
+  handle?(player: Player, value: T): void;
 }
 
-export interface ModalFormConfig {
+export interface ModalFormConfig<T = any> {
   title: string;
   previousForm?: ModalForm | ActionForm | MessageForm;
   components: FormComponent[];
+  handle?(player: Player, values?: T[] | undefined): void;
 }
 
 export interface ActionButton {
