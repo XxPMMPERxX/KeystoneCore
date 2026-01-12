@@ -1,6 +1,5 @@
 import { world } from "@minecraft/server";
-import { Listener } from "./types";
-import { Priority } from "./priority";
+import { Listener, Priority } from "./types";
 
 /**
  * AfterEventMap / BeforeEventMap を world.afterEvents / world.beforeEvents の

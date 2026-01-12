@@ -33,11 +33,13 @@ export class ModalForm {
     res.formValues?.forEach((value, index) => {
       const component = this.config.components[index];
       try {
-        component.handle(player, value);
+        component.handle?.(player, value);
       } catch (e) {
         console.warn(`[ModalForm] handler error at index ${index}: ${e}`);
       }
     });
+
+    this.config.handle?.(player, res.formValues);
   }
 }
 
