@@ -1,4 +1,9 @@
-import { AABB, Vector3 } from '@minecraft/server';
+import { Vector3 } from '@minecraft/server';
+
+interface AABB {
+  center: Vector3;
+  extent: Vector3;
+}
 
 export class AxisAlignedBB implements AABB {
   center: Vector3;
