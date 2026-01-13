@@ -1,5 +1,5 @@
 import type { Plugin, UserConfig } from 'vite';
-import type { OutputBundle, NormalizedOutputOptions, OutputChunk, OutputAsset } from 'rollup';
+import type { OutputBundle, NormalizedOutputOptions } from 'rollup';
 import { resolve } from 'path';
 import * as crypto from 'node:crypto';
 import * as fs from 'node:fs';
@@ -49,14 +49,18 @@ const behaviorPacker = ({
           },
         },
       },
-    }
+      esbuild: {
+        jsx: 'automatic',
+        jsxImportSource: 'keystonemc/form',
+      },
+    };
   },
 
   generateBundle(options: NormalizedOutputOptions, bundle: OutputBundle) {
     if (!embedSourceMap) return;
 
     // バンドル内のチャンクとソースマップを処理
-    for (const [fileName, file] of Object.entries(bundle)) {
+    for (const [, file] of Object.entries(bundle)) {
       if (file.type === 'chunk' && file.map) {
         const sourceMapData = file.map;
         
@@ -106,36 +110,36 @@ globalThis.__SOURCE_MAP__ = ${JSON.stringify(embeddedSourceMap)};
 
     const behaviorUUID = uuid ?? crypto.randomUUID();
     const manifestStub = {
-      "format_version": 2,
-      "header": {
-        "name": name,
-        "description": description,
-        "uuid": behaviorUUID,
-        "version": version,
-        "min_engine_version": [1, 21, 120]
+      'format_version': 2,
+      'header': {
+        'name': name,
+        'description': description,
+        'uuid': behaviorUUID,
+        'version': version,
+        'min_engine_version': [1, 21, 120]
       },
-      "modules": [
+      'modules': [
         {
-          "description": "script",
-          "type": "script",
-          "language": "javascript",
-          "uuid": crypto.randomUUID(),
-          "version": [1, 0, 0],
-          "entry": `scripts/${entryFile.fileName}`,
+          'description': 'script',
+          'type': 'script',
+          'language': 'javascript',
+          'uuid': crypto.randomUUID(),
+          'version': [1, 0, 0],
+          'entry': `scripts/${entryFile.fileName}`,
         }
       ],
-      "dependencies": [
+      'dependencies': [
         {
-          "module_name": "@minecraft/server",
-          "version": "2.4.0"
+          'module_name': '@minecraft/server',
+          'version': '2.4.0'
         },
         {
-          "module_name": "@minecraft/server-ui",
-          "version": "2.0.0"
+          'module_name': '@minecraft/server-ui',
+          'version': '2.0.0'
         },
       ],
-      "metadata": {
-        "authors": authors,
+      'metadata': {
+        'authors': authors,
       }
     };
 

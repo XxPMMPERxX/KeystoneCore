@@ -4,11 +4,18 @@ import { resolve } from 'path';
 
 export default defineConfig({
   plugins: [dts()],
+  resolve: {
+    alias: {
+      '@': resolve(__dirname, 'core'),
+    },
+  },
   build: {
     ssr: true,
     lib: {
       entry: {
         'index': resolve(__dirname, 'core/index.ts'),
+        'form/jsx-runtime/index': resolve(__dirname, 'core/form/tsx/runtime.ts'),
+        'form/component/index': resolve(__dirname, 'core/form/tsx/components/index.ts'),
         'vite-plugin/index': resolve(__dirname, 'vite-plugin/index.ts'),
       },
       formats: ['es'],
