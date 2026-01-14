@@ -1,6 +1,6 @@
 {
   "name": "keystonemc",
-  "version": "3.2.4",
+  "version": "4.0.0",
   "description": "ScriptAPI Wrapper",
   "type": "module",
   "scripts": {
@@ -12,10 +12,18 @@
   "types": "./dist/core/index.d.ts",
   "typesVersions": {
     "*": {
-      "form/jsx-runtime": ["./dist/core/form/tsx/runtime.d.ts"],
-      "form/jsx-dev-runtime": ["./dist/core/form/tsx/runtime.d.ts"],
-      "form/component": ["./dist/core/form/tsx/components/index.d.ts"],
-      "vite-plugin": ["./dist/vite-plugin/index.d.ts"]
+      "form/jsx-runtime": [
+        "./dist/core/form/tsx/runtime.d.ts"
+      ],
+      "form/jsx-dev-runtime": [
+        "./dist/core/form/tsx/runtime.d.ts"
+      ],
+      "form/component": [
+        "./dist/core/form/tsx/components/index.d.ts"
+      ],
+      "vite-plugin": [
+        "./dist/vite-plugin/index.d.ts"
+      ]
     }
   },
   "exports": {
