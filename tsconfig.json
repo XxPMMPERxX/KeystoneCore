@@ -20,6 +20,10 @@
     "listFiles": false,
     "noEmitHelpers": true,
     "skipLibCheck": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["core/*"]
+    }
   },
   "include": [
     "core/**/*",

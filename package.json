@@ -10,11 +10,34 @@
   "main": "./dist/index.js",
   "module": "./dist/index.js",
   "types": "./dist/core/index.d.ts",
+  "typesVersions": {
+    "*": {
+      "form/jsx-runtime": ["./dist/core/form/tsx/runtime.d.ts"],
+      "form/jsx-dev-runtime": ["./dist/core/form/tsx/runtime.d.ts"],
+      "form/component": ["./dist/core/form/tsx/components/index.d.ts"],
+      "vite-plugin": ["./dist/vite-plugin/index.d.ts"]
+    }
+  },
   "exports": {
     ".": {
       "types": "./dist/core/index.d.ts",
       "import": "./dist/index.js",
       "default": "./dist/index.js"
+    },
+    "./form/jsx-runtime": {
+      "types": "./dist/core/form/tsx/runtime.d.ts",
+      "import": "./dist/form/jsx-runtime/index.js",
+      "default": "./dist/form/jsx-runtime/index.js"
+    },
+    "./form/jsx-dev-runtime": {
+      "types": "./dist/core/form/tsx/runtime.d.ts",
+      "import": "./dist/form/jsx-runtime/index.js",
+      "default": "./dist/form/jsx-runtime/index.js"
+    },
+    "./form/component": {
+      "types": "./dist/core/form/tsx/components/index.d.ts",
+      "import": "./dist/form/component/index.js",
+      "default": "./dist/form/component/index.js"
     },
     "./vite-plugin": {
       "types": "./dist/vite-plugin/index.d.ts",

@@ -6,7 +6,7 @@ import { ActionFormConfig } from './types';
  * アイコン付きボタンを配置できるアクションフォーム
  */
 export class ActionForm {
-  private readonly config: ActionFormConfig
+  private readonly config: ActionFormConfig;
 
   constructor(config: ActionFormConfig) {
     this.config = config;
