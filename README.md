@@ -19,6 +19,6 @@
 1. core/ 配下でライブラリを更新
 1. キリが良いところで push する
 1. 動作確認は以下
-    1. keystone側で package.json の dependencies を書き換え
+    1. [keystone](https://github.com/XxPMMPERxX/Keystone)側で package.json の dependencies を書き換え
     1. `"keystonemc": "github:XxPMMPERxX/KeystoneCore#<ブランチ名>"`
     1. `npm install keystonemc` を実行するとブランチの最新の状態でインストールされる
