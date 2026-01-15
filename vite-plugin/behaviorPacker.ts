@@ -1,4 +1,4 @@
-import type { Plugin, UserConfig } from 'vite';
+import type { Plugin } from 'vite';
 import type { OutputBundle, NormalizedOutputOptions } from 'rollup';
 import { resolve } from 'path';
 import * as crypto from 'node:crypto';
@@ -29,9 +29,8 @@ const behaviorPacker = ({
 }): Plugin => ({
   name: 'BehaviorPacker',
   
-  config: (config: UserConfig) => {
+  config: () => {
     return {
-      ...config,
       build: {
         sourcemap: true,
         minify: false,
