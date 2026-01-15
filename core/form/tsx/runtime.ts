@@ -50,15 +50,10 @@ function normalizeChildren(children: any[]): any[] {
 }
 
 /**
- * 開発モード用 JSX エントリポイント
- * デバッグ情報（key, isStaticChildren, source, self）を受け取るが、現在は無視
+ * automatic runtime 用の内部実装
+ * children は props.children に含まれる
  */
-export function jsxDEV(
-  type: JSXElementType,
-  props: any,
-  ..._deps: unknown[]
-) {
-  void _deps;
+function jsxInternal(type: JSXElementType, props: any) {
   const children = props?.children;
   const restProps = { ...props };
   delete restProps.children;
@@ -77,7 +72,28 @@ export function jsxDEV(
   });
 }
 
-export {
-  createElement as jsx,
-  createElement as jsxs,
-};
+/**
+ * 本番モード用 JSX エントリポイント
+ */
+export function jsx(
+  type: JSXElementType,
+  props: any,
+  _key?: unknown
+) {
+  void _key;
+  return jsxInternal(type, props);
+}
+
+export { jsx as jsxs };
+
+/**
+ * 開発モード用 JSX エントリポイント
+ */
+export function jsxDEV(
+  type: JSXElementType,
+  props: any,
+  ..._deps: unknown[]
+) {
+  void _deps;
+  return jsxInternal(type, props);
+}
