@@ -19,10 +19,7 @@ echo ""
 
 # インストールディレクトリ名を取得
 get_install_dir() {
-    echo -e "${GREEN}インストールディレクトリ名を入力してください${NC}"
-    echo "（デフォルト: Keystone）"
-    
-    read -r dir_name
+    read -r -e -p "インストール先 (Keystone):" dir_name
     if [ -z "$dir_name" ]; then
         INSTALL_DIR="Keystone"
     else
@@ -176,24 +173,6 @@ clone_keystone() {
 
         # バックアップファイルを削除
         rm -f "$INSTALL_DIR/.env.bak"
-
-        # template配下をworlds/DevWorld配下にコピー（既存ファイルは上書きしない）
-        if [ -d "$INSTALL_DIR/template" ]; then
-            echo -e "${GREEN}テンプレートファイルをDevWorldにコピーしています...${NC}"
-            mkdir -p "$INSTALL_DIR/worlds/DevWorld"
-
-            # macOSとLinuxで動作する方法でコピー
-            for file in "$INSTALL_DIR/template"/*; do
-                if [ -e "$file" ]; then
-                    filename=$(basename "$file")
-                    if [ ! -e "$INSTALL_DIR/worlds/DevWorld/$filename" ]; then
-                        cp -r "$file" "$INSTALL_DIR/worlds/DevWorld/"
-                    fi
-                fi
-            done
-
-            echo -e "${GREEN}テンプレートファイルのコピーが完了しました${NC}"
-        fi
     else
         echo -e "${RED}エラー: リポジトリのクローンに失敗しました${NC}"
         exit 1
