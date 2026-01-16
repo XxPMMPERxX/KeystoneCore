@@ -34,7 +34,7 @@ const behaviorPacker = ({
       build: {
         sourcemap: true,
         minify: false,
-        outDir: './dist_behavior_pack/scripts',
+        outDir: 'dist/behavior_pack/scripts',
         emptyOutDir: true,
         assetsDir: '',
         rollupOptions: {
@@ -138,7 +138,7 @@ globalThis.__SOURCE_MAP__ = ${JSON.stringify(embeddedSourceMap)};
       }
     };
 
-    fs.writeFileSync('./dist_behavior_pack/manifest.json', JSON.stringify(manifestStub, null, 2));
+    fs.writeFileSync('./dist/behavior_pack/manifest.json', JSON.stringify(manifestStub, null, 2));
   },
 });
 
