@@ -2,16 +2,16 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ActionForm, createActionForm } from '@/form/actionForm';
 import { ModalForm, createModalForm } from '@/form/modalForm';
 import { MessageForm, createMessageForm } from '@/form/messageForm';
-import { Button } from '@/form/components';
-import { createTestPlayer } from '../../mocks/test-utils';
+import { button } from '@/form/components';
+import { createTestPlayer, resetAllMocks } from '../../mocks/test-utils';
 import { ActionFormData, ModalFormData, MessageFormData } from '@minecraft/server-ui';
 
 describe('Form', () => {
   let player: ReturnType<typeof createTestPlayer>;
 
   beforeEach(() => {
+    resetAllMocks();
     player = createTestPlayer();
-    vi.clearAllMocks();
   });
 
   describe('ActionForm', () => {
@@ -27,30 +27,27 @@ describe('Form', () => {
 
     it('send() でプレイヤーにフォームを送信できる', async () => {
       const buttonHandler = vi.fn();
-      const button = new Button({
+      const testButton = button({
         text: 'Click Me',
-        handle: buttonHandler,
+        handler: buttonHandler,
       });
 
       const form = createActionForm({
         title: 'Test Form',
         body: 'Select an option',
-        buttons: [button],
+        buttons: [testButton],
       });
 
       // ActionFormDataのshowメソッドをモック
-      const showSpy = vi.spyOn(ActionFormData.prototype, 'show');
-      showSpy.mockResolvedValue({
+      ActionFormData.prototype.show = vi.fn().mockResolvedValue({
         canceled: false,
         selection: 0,
       });
 
       await form.send(player);
 
-      expect(showSpy).toHaveBeenCalledWith(player);
+      expect(ActionFormData.prototype.show).toHaveBeenCalledWith(player);
       expect(buttonHandler).toHaveBeenCalledWith(player);
-
-      showSpy.mockRestore();
     });
 
     it('フォームがキャンセルされた場合、前のフォームに戻る', async () => {
@@ -59,7 +56,7 @@ describe('Form', () => {
         buttons: [],
       });
 
-      const previousFormSendSpy = vi.spyOn(previousForm, 'send');
+      const previousFormSendSpy = vi.spyOn(previousForm, 'send').mockResolvedValue();
 
       const form = createActionForm({
         title: 'Current Form',
@@ -67,16 +64,13 @@ describe('Form', () => {
         previousForm,
       });
 
-      const showSpy = vi.spyOn(ActionFormData.prototype, 'show');
-      showSpy.mockResolvedValue({
+      ActionFormData.prototype.show = vi.fn().mockResolvedValue({
         canceled: true,
       });
 
       await form.send(player);
 
       expect(previousFormSendSpy).toHaveBeenCalledWith(player);
-
-      showSpy.mockRestore();
     });
 
     it('複数のボタンを持つフォームを作成できる', async () => {
@@ -86,13 +80,12 @@ describe('Form', () => {
       const form = createActionForm({
         title: 'Multi Button Form',
         buttons: [
-          new Button({ text: 'Button 1', handle: button1Handler }),
-          new Button({ text: 'Button 2', handle: button2Handler }),
+          button({ text: 'Button 1', handler: button1Handler }),
+          button({ text: 'Button 2', handler: button2Handler }),
         ],
       });
 
-      const showSpy = vi.spyOn(ActionFormData.prototype, 'show');
-      showSpy.mockResolvedValue({
+      ActionFormData.prototype.show = vi.fn().mockResolvedValue({
         canceled: false,
         selection: 1, // 2番目のボタンを選択
       });
@@ -101,8 +94,6 @@ describe('Form', () => {
 
       expect(button1Handler).not.toHaveBeenCalled();
       expect(button2Handler).toHaveBeenCalledWith(player);
-
-      showSpy.mockRestore();
     });
   });
 
@@ -125,18 +116,15 @@ describe('Form', () => {
         handle: formHandler,
       });
 
-      const showSpy = vi.spyOn(ModalFormData.prototype, 'show');
-      showSpy.mockResolvedValue({
+      ModalFormData.prototype.show = vi.fn().mockResolvedValue({
         canceled: false,
         formValues: [],
       });
 
       await form.send(player);
 
-      expect(showSpy).toHaveBeenCalledWith(player);
+      expect(ModalFormData.prototype.show).toHaveBeenCalledWith(player);
       expect(formHandler).toHaveBeenCalledWith(player, []);
-
-      showSpy.mockRestore();
     });
 
     it('フォームがキャンセルされた場合、前のフォームに戻る', async () => {
@@ -145,7 +133,7 @@ describe('Form', () => {
         components: [],
       });
 
-      const previousFormSendSpy = vi.spyOn(previousForm, 'send');
+      const previousFormSendSpy = vi.spyOn(previousForm, 'send').mockResolvedValue();
 
       const form = createModalForm({
         title: 'Current Modal',
@@ -153,16 +141,13 @@ describe('Form', () => {
         previousForm,
       });
 
-      const showSpy = vi.spyOn(ModalFormData.prototype, 'show');
-      showSpy.mockResolvedValue({
+      ModalFormData.prototype.show = vi.fn().mockResolvedValue({
         canceled: true,
       });
 
       await form.send(player);
 
       expect(previousFormSendSpy).toHaveBeenCalledWith(player);
-
-      showSpy.mockRestore();
     });
 
     it('各コンポーネントのハンドラが値とともに呼ばれる', async () => {
@@ -178,8 +163,7 @@ describe('Form', () => {
         ],
       });
 
-      const showSpy = vi.spyOn(ModalFormData.prototype, 'show');
-      showSpy.mockResolvedValue({
+      ModalFormData.prototype.show = vi.fn().mockResolvedValue({
         canceled: false,
         formValues: ['TestValue'],
       });
@@ -187,8 +171,6 @@ describe('Form', () => {
       await form.send(player);
 
       expect(componentHandler).toHaveBeenCalledWith(player, 'TestValue');
-
-      showSpy.mockRestore();
     });
   });
 
@@ -215,19 +197,16 @@ describe('Form', () => {
         no: { text: 'No', handler: noHandler },
       });
 
-      const showSpy = vi.spyOn(MessageFormData.prototype, 'show');
-      showSpy.mockResolvedValue({
+      MessageFormData.prototype.show = vi.fn().mockResolvedValue({
         canceled: false,
         selection: 0, // Yesを選択
       });
 
       await form.send(player);
 
-      expect(showSpy).toHaveBeenCalledWith(player);
+      expect(MessageFormData.prototype.show).toHaveBeenCalledWith(player);
       expect(yesHandler).toHaveBeenCalledWith(player);
       expect(noHandler).not.toHaveBeenCalled();
-
-      showSpy.mockRestore();
     });
 
     it('Noボタンを選択した場合、noハンドラが呼ばれる', async () => {
@@ -241,8 +220,7 @@ describe('Form', () => {
         no: { text: 'No', handler: noHandler },
       });
 
-      const showSpy = vi.spyOn(MessageFormData.prototype, 'show');
-      showSpy.mockResolvedValue({
+      MessageFormData.prototype.show = vi.fn().mockResolvedValue({
         canceled: false,
         selection: 1, // Noを選択
       });
@@ -251,8 +229,6 @@ describe('Form', () => {
 
       expect(yesHandler).not.toHaveBeenCalled();
       expect(noHandler).toHaveBeenCalledWith(player);
-
-      showSpy.mockRestore();
     });
 
     it('フォームがキャンセルされた場合、前のフォームに戻る', async () => {
@@ -263,7 +239,7 @@ describe('Form', () => {
         no: { text: 'No', handler: () => {} },
       });
 
-      const previousFormSendSpy = vi.spyOn(previousForm, 'send');
+      const previousFormSendSpy = vi.spyOn(previousForm, 'send').mockResolvedValue();
 
       const form = createMessageForm({
         title: 'Current Message',
@@ -273,16 +249,13 @@ describe('Form', () => {
         previousForm,
       });
 
-      const showSpy = vi.spyOn(MessageFormData.prototype, 'show');
-      showSpy.mockResolvedValue({
+      MessageFormData.prototype.show = vi.fn().mockResolvedValue({
         canceled: true,
       });
 
       await form.send(player);
 
       expect(previousFormSendSpy).toHaveBeenCalledWith(player);
-
-      showSpy.mockRestore();
     });
   });
 });

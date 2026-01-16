@@ -1,4 +1,3 @@
-import { vi } from 'vitest';
 import type { Player } from './minecraft-server';
 
 /**
@@ -45,13 +44,13 @@ export class ActionFormData {
     return this;
   }
 
-  show = vi.fn(async (player: Player): Promise<ActionFormResponse> => {
+  async show(player: Player): Promise<ActionFormResponse> {
     // デフォルトでは最初のボタンが選択されたことにする
     return {
       canceled: false,
       selection: 0,
     };
-  });
+  }
 
   // テスト用ヘルパー
   __getTitle() {
@@ -119,7 +118,7 @@ export class ModalFormData {
     return this;
   }
 
-  show = vi.fn(async (player: Player): Promise<ModalFormResponse> => {
+  async show(player: Player): Promise<ModalFormResponse> {
     // デフォルトで各コントロールのデフォルト値を返す
     const formValues = this._controls.map((control) => {
       if (control.type === 'textField') {
@@ -138,7 +137,7 @@ export class ModalFormData {
       canceled: false,
       formValues,
     };
-  });
+  }
 
   // テスト用ヘルパー
   __getTitle() {
@@ -177,13 +176,13 @@ export class MessageFormData {
     return this;
   }
 
-  show = vi.fn(async (player: Player): Promise<MessageFormResponse> => {
+  async show(player: Player): Promise<MessageFormResponse> {
     // デフォルトでは button1 が選択されたことにする
     return {
       canceled: false,
       selection: 0,
     };
-  });
+  }
 
   // テスト用ヘルパー
   __getTitle() {

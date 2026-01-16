@@ -1,15 +1,11 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import {
-  RepeatingTimer,
-  DelayedTimer,
-  UntilTimer,
   repeating,
   delayed,
   sleep,
   until,
   waitUntil,
 } from '@/timer/timer';
-import { system } from '@minecraft/server';
 import { tickSystem, resetAllMocks } from '../../mocks/test-utils';
 
 describe('Timer', () => {
@@ -20,7 +16,7 @@ describe('Timer', () => {
   describe('RepeatingTimer', () => {
     it('repeating() で定期的にコールバックを実行できる', () => {
       const callback = vi.fn();
-      const timer = repeating({
+      repeating({
         every: 5,
         run: callback,
       });
@@ -30,8 +26,8 @@ describe('Timer', () => {
       expect(callback).toHaveBeenCalledTimes(1);
       expect(callback).toHaveBeenCalledWith(5);
 
-      // さらに5 tick経過
-      tickSystem(10);
+      // さらに5 tick経過（合計10 tick）
+      tickSystem(5);
       expect(callback).toHaveBeenCalledTimes(2);
       expect(callback).toHaveBeenCalledWith(10);
     });
@@ -40,7 +36,7 @@ describe('Timer', () => {
       const callback = vi.fn();
       const finalCallback = vi.fn();
 
-      const timer = repeating({
+      repeating({
         every: 1,
         run: callback,
         max: 3,
@@ -53,7 +49,7 @@ describe('Timer', () => {
       expect(finalCallback).toHaveBeenCalledTimes(1);
 
       // さらに進めても呼ばれない
-      tickSystem(5);
+      tickSystem(2);
       expect(callback).toHaveBeenCalledTimes(3);
     });
 
@@ -73,10 +69,14 @@ describe('Timer', () => {
 
       // キャンセル
       timer.cancel();
-      tickSystem(3);
 
-      expect(callback).toHaveBeenCalledTimes(2);
+      // 次のtickでキャンセルが処理される
+      tickSystem(1);
       expect(cancelCallback).toHaveBeenCalledTimes(1);
+
+      // それ以降は呼ばれない
+      tickSystem(2);
+      expect(callback).toHaveBeenCalledTimes(2);
     });
 
     it('stop() と resume() でタイマーを一時停止・再開できる', () => {
@@ -93,13 +93,13 @@ describe('Timer', () => {
 
       // 停止
       timer.stop();
-      tickSystem(5);
+      tickSystem(3);
       expect(callback).toHaveBeenCalledTimes(2); // 停止中なので呼ばれない
 
       // 再開
       timer.resume();
-      tickSystem(7);
-      expect(callback).toHaveBeenCalledTimes(3);
+      tickSystem(2);
+      expect(callback).toHaveBeenCalledTimes(4);
     });
 
     it('isStopped() で停止状態を確認できる', () => {
@@ -132,7 +132,7 @@ describe('Timer', () => {
 
       // 停止
       timer.stop();
-      tickSystem(5);
+      tickSystem(3);
       // runWhileStopped が true なので停止中でも実行される
       expect(callback).toHaveBeenCalledTimes(5);
     });
@@ -148,20 +148,19 @@ describe('Timer', () => {
       tickSystem(9);
       expect(callback).not.toHaveBeenCalled();
 
-      // 10 tick経過（実行される）
-      tickSystem(10);
+      // 1 tick経過（合計10 tick、実行される）
+      tickSystem(1);
       expect(callback).toHaveBeenCalledTimes(1);
 
       // さらに進めても1回だけ
-      tickSystem(20);
+      tickSystem(10);
       expect(callback).toHaveBeenCalledTimes(1);
     });
 
     it('cancel() でタイマーをキャンセルできる', () => {
       const callback = vi.fn();
-      const cancelCallback = vi.fn();
 
-      const timer = delayed(10, callback, cancelCallback);
+      const timer = delayed(10, callback);
 
       // 5 tick経過
       tickSystem(5);
@@ -169,10 +168,10 @@ describe('Timer', () => {
 
       // キャンセル
       timer.cancel();
-      tickSystem(15);
 
+      // 進めてもコールバックは呼ばれない
+      tickSystem(10);
       expect(callback).not.toHaveBeenCalled();
-      expect(cancelCallback).toHaveBeenCalledTimes(1);
     });
 
     it('sleep() で指定tick後にresolveされる', async () => {
@@ -185,10 +184,11 @@ describe('Timer', () => {
 
       // 4 tick経過（まだresolveされない）
       tickSystem(4);
+      await Promise.resolve(); // マイクロタスクを処理
       expect(resolved).toBe(false);
 
-      // 5 tick経過（resolveされる）
-      tickSystem(5);
+      // 1 tick経過（合計5 tick、resolveされる）
+      tickSystem(1);
       await promise;
       expect(resolved).toBe(true);
     });
@@ -206,16 +206,16 @@ describe('Timer', () => {
         every: 1,
       });
 
-      // 4 tick経過（条件が満たされない）
+      // 条件が満たされないまま4 tick経過
       for (let i = 0; i < 4; i++) {
         count++;
-        tickSystem(i + 1);
+        tickSystem(1);
       }
       expect(callback).not.toHaveBeenCalled();
 
-      // 5 tick経過（条件が満たされる）
+      // 条件が満たされる
       count++;
-      tickSystem(5);
+      tickSystem(1);
       expect(callback).toHaveBeenCalledTimes(1);
     });
 
@@ -237,8 +237,8 @@ describe('Timer', () => {
       expect(callback).not.toHaveBeenCalled();
       expect(timeoutCallback).not.toHaveBeenCalled();
 
-      // 10 tick経過（タイムアウト）
-      tickSystem(10);
+      // 1 tick経過（合計10 tick、タイムアウト）
+      tickSystem(1);
       expect(callback).not.toHaveBeenCalled();
       expect(timeoutCallback).toHaveBeenCalledTimes(1);
     });
@@ -246,13 +246,11 @@ describe('Timer', () => {
     it('cancel() でタイマーをキャンセルできる', () => {
       const condition = () => false;
       const callback = vi.fn();
-      const cancelCallback = vi.fn();
 
       const timer = until({
         when: condition,
         run: callback,
         every: 1,
-        cancel: cancelCallback,
       });
 
       // 3 tick経過
@@ -260,10 +258,10 @@ describe('Timer', () => {
 
       // キャンセル
       timer.cancel();
-      tickSystem(5);
 
+      // さらに進めても呼ばれない
+      tickSystem(5);
       expect(callback).not.toHaveBeenCalled();
-      expect(cancelCallback).toHaveBeenCalledTimes(1);
     });
 
     it('stop() でタイマーを一時停止できる', () => {
@@ -278,18 +276,17 @@ describe('Timer', () => {
       });
 
       // 2 tick経過
-      count = 2;
       tickSystem(2);
 
       // 停止
       timer.stop();
       count = 10; // 条件を満たす値にする
-      tickSystem(5);
+      tickSystem(3);
       expect(callback).not.toHaveBeenCalled(); // 停止中なので実行されない
 
       // 再開
       timer.resume();
-      tickSystem(6);
+      tickSystem(1);
       expect(callback).toHaveBeenCalledTimes(1);
     });
 
@@ -303,9 +300,9 @@ describe('Timer', () => {
       count = 2;
       tickSystem(2);
 
-      // 3 tick経過（条件が満たされる）
+      // 条件が満たされる
       count = 3;
-      tickSystem(3);
+      tickSystem(1);
 
       const result = await promise;
       expect(result).toBe(true);

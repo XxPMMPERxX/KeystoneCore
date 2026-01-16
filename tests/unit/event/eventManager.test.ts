@@ -1,12 +1,14 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { EventManager } from '@/event/eventManager';
 import { Priority } from '@/event/types';
-import { world } from '@minecraft/server';
-import { resetAllMocks } from '../../mocks/test-utils';
+import { world } from '../../mocks/minecraft-server';
 
 describe('EventManager', () => {
   beforeEach(() => {
-    resetAllMocks();
+    // EventManager は モジュールロード時に world.afterEvents/beforeEvents に subscribe しているため、
+    // world.__clearAllEvents() を呼ぶと EventManager のハンドラも消えてしまう。
+    // そのため、ここでは EventManager.clearAllListeners() のみを呼ぶ。
+    vi.clearAllMocks();
     EventManager.clearAllListeners();
   });
 
@@ -19,14 +21,9 @@ describe('EventManager', () => {
         priority: Priority.NORMAL,
       });
 
-      // world.afterEvents.playerJoin のイベントをトリガー
-      const subscribeCall = world.afterEvents.playerJoin.subscribe.mock.calls[0];
-      expect(subscribeCall).toBeDefined();
-
-      // subscribeに渡されたコールバックを実行
-      const eventCallback = subscribeCall[0];
+      // イベントをディスパッチ
       const mockEvent = { player: { name: 'TestPlayer' } };
-      eventCallback(mockEvent);
+      (world.afterEvents.playerJoin as any).__dispatch(mockEvent);
 
       // ハンドラが呼ばれることを確認
       expect(handler).toHaveBeenCalledWith(mockEvent);
@@ -46,11 +43,9 @@ describe('EventManager', () => {
         priority: Priority.HIGH,
       });
 
-      // イベントをトリガー
-      const subscribeCall = world.afterEvents.playerJoin.subscribe.mock.calls[0];
-      const eventCallback = subscribeCall[0];
+      // イベントをディスパッチ
       const mockEvent = { player: { name: 'TestPlayer' } };
-      eventCallback(mockEvent);
+      (world.afterEvents.playerJoin as any).__dispatch(mockEvent);
 
       expect(handler1).toHaveBeenCalledWith(mockEvent);
       expect(handler2).toHaveBeenCalledWith(mockEvent);
@@ -79,10 +74,8 @@ describe('EventManager', () => {
         priority: Priority.HIGHEST,
       });
 
-      // イベントをトリガー
-      const subscribeCall = world.afterEvents.playerJoin.subscribe.mock.calls[0];
-      const eventCallback = subscribeCall[0];
-      eventCallback({});
+      // イベントをディスパッチ
+      (world.afterEvents.playerJoin as any).__dispatch({});
 
       // 優先度: HIGHEST(1) > HIGH(2) > NORMAL(3) > LOW(4)
       expect(executionOrder).toEqual(['HIGHEST', 'HIGH', 'NORMAL', 'LOW']);
@@ -105,10 +98,8 @@ describe('EventManager', () => {
         priority: Priority.LOW,
       });
 
-      // イベントをトリガー
-      const subscribeCall = world.afterEvents.playerJoin.subscribe.mock.calls[0];
-      const eventCallback = subscribeCall[0];
-      eventCallback({});
+      // イベントをディスパッチ
+      (world.afterEvents.playerJoin as any).__dispatch({});
 
       // NO_PRIORITY は NORMAL として扱われる
       expect(executionOrder).toEqual(['HIGH', 'NO_PRIORITY', 'LOW']);
@@ -124,14 +115,9 @@ describe('EventManager', () => {
         priority: Priority.NORMAL,
       });
 
-      // world.beforeEvents.playerBreakBlock のイベントをトリガー
-      const subscribeCall = world.beforeEvents.playerBreakBlock.subscribe.mock.calls[0];
-      expect(subscribeCall).toBeDefined();
-
-      // subscribeに渡されたコールバックを実行
-      const eventCallback = subscribeCall[0];
+      // イベントをディスパッチ
       const mockEvent = { player: { name: 'TestPlayer' }, block: {} };
-      eventCallback(mockEvent);
+      (world.beforeEvents.playerBreakBlock as any).__dispatch(mockEvent);
 
       // ハンドラが呼ばれることを確認
       expect(handler).toHaveBeenCalledWith(mockEvent);
@@ -155,13 +141,11 @@ describe('EventManager', () => {
         priority: Priority.MONITOR,
       });
 
-      // イベントをトリガー
-      const subscribeCall = world.beforeEvents.playerBreakBlock.subscribe.mock.calls[0];
-      const eventCallback = subscribeCall[0];
-      eventCallback({});
+      // イベントをディスパッチ
+      (world.beforeEvents.playerBreakBlock as any).__dispatch({});
 
       // 優先度: HIGHEST(1) > NORMAL(3) > MONITOR(0)
-      // MONITOR が最後に実行される
+      // MONITOR(0) が最も高い数値なので最後に実行される
       expect(executionOrder).toEqual(['HIGHEST', 'NORMAL', 'MONITOR']);
     });
   });
@@ -184,10 +168,8 @@ describe('EventManager', () => {
         priority: Priority.LOW,
       });
 
-      // イベントをトリガー
-      const subscribeCall = world.afterEvents.playerJoin.subscribe.mock.calls[0];
-      const eventCallback = subscribeCall[0];
-      eventCallback({});
+      // イベントをディスパッチ
+      (world.afterEvents.playerJoin as any).__dispatch({});
 
       // handler1 はエラーを投げるが、handler2 は実行される
       expect(handler1).toHaveBeenCalled();
@@ -214,14 +196,9 @@ describe('EventManager', () => {
       // クリア
       EventManager.clearAllListeners();
 
-      // イベントをトリガー
-      const afterSubscribeCall = world.afterEvents.playerJoin.subscribe.mock.calls[0];
-      const afterEventCallback = afterSubscribeCall[0];
-      afterEventCallback({});
-
-      const beforeSubscribeCall = world.beforeEvents.playerBreakBlock.subscribe.mock.calls[0];
-      const beforeEventCallback = beforeSubscribeCall[0];
-      beforeEventCallback({});
+      // イベントをディスパッチ
+      (world.afterEvents.playerJoin as any).__dispatch({});
+      (world.beforeEvents.playerBreakBlock as any).__dispatch({});
 
       // ハンドラは呼ばれない
       expect(handler1).not.toHaveBeenCalled();
@@ -236,7 +213,7 @@ describe('EventManager', () => {
 
       // ウェルカムメッセージ（優先度: HIGH）
       EventManager.registerAfter('playerJoin', {
-        handler: (event) => {
+        handler: (event: any) => {
           welcomeMessage(event.player?.name);
         },
         priority: Priority.HIGH,
@@ -244,16 +221,14 @@ describe('EventManager', () => {
 
       // ログ記録（優先度: MONITOR）
       EventManager.registerAfter('playerJoin', {
-        handler: (event) => {
+        handler: (event: any) => {
           logJoin(event.player?.name);
         },
         priority: Priority.MONITOR,
       });
 
-      // イベントをトリガー
-      const subscribeCall = world.afterEvents.playerJoin.subscribe.mock.calls[0];
-      const eventCallback = subscribeCall[0];
-      eventCallback({ player: { name: 'Alice' } });
+      // イベントをディスパッチ
+      (world.afterEvents.playerJoin as any).__dispatch({ player: { name: 'Alice' } });
 
       // 両方のハンドラが実行される
       expect(welcomeMessage).toHaveBeenCalledWith('Alice');

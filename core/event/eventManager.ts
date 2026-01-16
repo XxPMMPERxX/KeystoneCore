@@ -51,7 +51,8 @@ function registerAfter<K extends AfterEventName>(eventName: K, listener: Listene
   }
   const arr = afterListeners[eventName]!;
   arr.push(listener as Listener<any>);
-  arr.sort((a, b) => (b.priority ?? Priority.NORMAL) - (a.priority ?? Priority.NORMAL));
+  // 優先度の値が小さいほど先に実行される（HIGHEST=1 が最初）
+  arr.sort((a, b) => (a.priority ?? Priority.NORMAL) - (b.priority ?? Priority.NORMAL));
 }
 
 function registerBefore<K extends BeforeEventName>(eventName: K, listener: Listener<BeforeEventMap[K]>) {
@@ -60,7 +61,8 @@ function registerBefore<K extends BeforeEventName>(eventName: K, listener: Liste
   }
   const arr = beforeListeners[eventName]!;
   arr.push(listener as Listener<any>);
-  arr.sort((a, b) => (b.priority ?? Priority.NORMAL) - (a.priority ?? Priority.NORMAL));
+  // 優先度の値が小さいほど先に実行される（HIGHEST=1 が最初）
+  arr.sort((a, b) => (a.priority ?? Priority.NORMAL) - (b.priority ?? Priority.NORMAL));
 }
 
 // ---------- dispatch ----------
