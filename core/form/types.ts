@@ -6,6 +6,7 @@ import { ModalForm } from './modalForm';
 import { MessageForm } from './messageForm';
 
 export interface FormComponent<T = any> {
+  type: string;
   render(form: ModalFormData): void;
   handle?(player: Player, value: T): void;
 }

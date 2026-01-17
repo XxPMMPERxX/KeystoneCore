@@ -13,6 +13,7 @@ export function toggle(opts: {
   handler?(player: Player, value: boolean): void;
 }): FormComponent<boolean> {
   return {
+    type: 'toggle',
     render(form: ModalFormData) {
       form.toggle(opts.label, { defaultValue: opts.default });
     },
@@ -34,6 +35,7 @@ export function textField(opts: {
   handler?(player: Player, value: string): void;
 }): FormComponent<string> {
   return {
+    type: 'text_field',
     render(form: ModalFormData) {
       form.textField(
         opts.label,
@@ -61,6 +63,7 @@ export function slider(opts: {
   handler?(player: Player, value: number): void;
 }): FormComponent<number> {
   return {
+    type: 'slider',
     render(form: ModalFormData) {
       form.slider(
         opts.label,
@@ -87,6 +90,7 @@ export function dropdown(opts: {
   handler?(player: Player, value: number): void;
 }): FormComponent<number> {
   return {
+    type: 'dropdown',
     render(form: ModalFormData) {
       form.dropdown(
         opts.label,
