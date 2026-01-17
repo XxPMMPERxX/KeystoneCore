@@ -4,6 +4,37 @@ import { resolve, relative } from 'path';
 import * as crypto from 'node:crypto';
 import * as fs from 'node:fs';
 
+type ManifestStub = {
+  format_version?: number,
+  header?: {
+    name?: string,
+    description?: string,
+    uuid?: string,
+    version?: number[],
+    min_engine_version?: number[],
+    [key: string]: unknown,
+  },
+  modules?: Array<{
+    description?: string,
+    type?: string,
+    language?: string,
+    uuid?: string,
+    version?: number[],
+    entry?: string,
+    [key: string]: unknown,
+  }>,
+  dependencies?: Array<{
+    module_name?: string,
+    version?: string,
+    [key: string]: unknown,
+  }>,
+  metadata?: {
+    authors?: string[],
+    [key: string]: unknown,
+  },
+  [key: string]: unknown,
+};
+
 type PluginConfig = {
   name: string,
   uuid?: string,
@@ -11,6 +42,51 @@ type PluginConfig = {
   authors?: string[],
   version?: number[],
   embedSourceMap?: boolean,
+  manifest?: ManifestStub,
+};
+
+const mergeArrayByKey = <T extends Record<string, unknown>>(
+  target: T[],
+  source: T[],
+  key: string
+): T[] => {
+  const result = [...target];
+  for (const sourceItem of source) {
+    const keyValue = sourceItem[key];
+    const existingIndex = result.findIndex(item => item[key] === keyValue);
+    if (existingIndex >= 0) {
+      result[existingIndex] = { ...result[existingIndex], ...sourceItem };
+    } else {
+      result.push(sourceItem);
+    }
+  }
+  return result;
+};
+
+const ARRAY_MERGE_KEYS: Record<string, string> = {
+  dependencies: 'module_name',
+  modules: 'type',
+};
+
+const deepMerge = <T extends Record<string, unknown>>(target: T, source: Partial<T>): T => {
+  const result = { ...target };
+  for (const key in source) {
+    const sourceValue = source[key];
+    const targetValue = target[key];
+    if (Array.isArray(sourceValue) && Array.isArray(targetValue) && ARRAY_MERGE_KEYS[key]) {
+      result[key] = mergeArrayByKey(
+        targetValue as Record<string, unknown>[],
+        sourceValue as Record<string, unknown>[],
+        ARRAY_MERGE_KEYS[key]
+      ) as T[typeof key];
+    } else if (sourceValue && typeof sourceValue === 'object' && !Array.isArray(sourceValue) &&
+        targetValue && typeof targetValue === 'object' && !Array.isArray(targetValue)) {
+      result[key] = deepMerge(targetValue as Record<string, unknown>, sourceValue as Record<string, unknown>) as T[typeof key];
+    } else if (sourceValue !== undefined) {
+      result[key] = sourceValue as T[typeof key];
+    }
+  }
+  return result;
 };
 
 const behaviorPacker = ({
@@ -20,6 +96,7 @@ const behaviorPacker = ({
   authors = [],
   version = [1, 0, 0],
   embedSourceMap = true,
+  manifest: manifestOverride,
 }: PluginConfig = {
   name: 'my first plugin',
   description: '',
@@ -110,7 +187,7 @@ globalThis.__SOURCE_MAP__ = ${JSON.stringify(embeddedSourceMap)};
     }
 
     const behaviorUUID = uuid ?? crypto.randomUUID();
-    const manifestStub = {
+    const manifestStub: ManifestStub = {
       'format_version': 2,
       'header': {
         'name': name,
@@ -144,7 +221,11 @@ globalThis.__SOURCE_MAP__ = ${JSON.stringify(embeddedSourceMap)};
       }
     };
 
-    fs.writeFileSync('./dist/behavior_pack/manifest.json', JSON.stringify(manifestStub, null, 2));
+    const finalManifest = manifestOverride
+      ? deepMerge(manifestStub, manifestOverride)
+      : manifestStub;
+
+    fs.writeFileSync('./dist/behavior_pack/manifest.json', JSON.stringify(finalManifest, null, 2));
   },
 });
 
