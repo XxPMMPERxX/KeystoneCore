@@ -1,6 +1,6 @@
 import type { Plugin } from 'vite';
 import type { OutputBundle, NormalizedOutputOptions } from 'rollup';
-import { resolve } from 'path';
+import { resolve, relative } from 'path';
 import * as crypto from 'node:crypto';
 import * as fs from 'node:fs';
 
@@ -59,9 +59,15 @@ const behaviorPacker = ({
       if (file.type === 'chunk' && file.map) {
         const sourceMapData = file.map;
         
+        const projectRoot = process.cwd();
+        const outputDir = resolve(projectRoot, options.dir || 'dist/behavior_pack/scripts');
+
         const embeddedSourceMap = {
           version: sourceMapData.version,
-          sources: sourceMapData.sources,
+          sources: sourceMapData.sources.map(source => {
+            const absolutePath = resolve(outputDir, source);
+            return relative(projectRoot, absolutePath);
+          }),
           sourcesContent: sourceMapData.sourcesContent,
           mappings: sourceMapData.mappings,
           names: sourceMapData.names,

@@ -1,6 +1,6 @@
 import { Player } from '@minecraft/server';
 import { ModalFormData, ActionFormData } from '@minecraft/server-ui';
-import { ActionButton, FormComponent } from './types';
+import { ActionButton, FormComponent, StatelessFormComponent } from './types';
 
 /**
  * トグル
@@ -14,6 +14,7 @@ export function toggle(opts: {
 }): FormComponent<boolean> {
   return {
     type: 'toggle',
+    opts,
     render(form: ModalFormData) {
       form.toggle(opts.label, { defaultValue: opts.default });
     },
@@ -37,6 +38,7 @@ export function textField(opts: {
 }): FormComponent<string> {
   return {
     type: 'text_field',
+    opts,
     render(form: ModalFormData) {
       form.textField(
         opts.label,
@@ -68,6 +70,7 @@ export function slider(opts: {
 }): FormComponent<number> {
   return {
     type: 'slider',
+    opts,
     render(form: ModalFormData) {
       form.slider(
         opts.label,
@@ -95,6 +98,7 @@ export function dropdown(opts: {
 }): FormComponent<number> {
   return {
     type: 'dropdown',
+    opts,
     render(form: ModalFormData) {
       form.dropdown(
         opts.label,
@@ -105,6 +109,48 @@ export function dropdown(opts: {
     handle(player, value) {
       opts.handler?.(player, value);
     }
+  };
+}
+
+/**
+ * ヘッダー
+ */
+export function header(opts: {
+  text: string;
+}): StatelessFormComponent {
+  return {
+    type: 'header',
+    opts,
+    render(form: ModalFormData) {
+      form.header(opts.text);
+    },
+  };
+}
+
+/**
+ * ラベル
+ */
+export function label(opts: {
+  text: string;
+}): StatelessFormComponent {
+  return {
+    type: 'label',
+    opts,
+    render(form: ModalFormData) {
+      form.label(opts.text);
+    },
+  };
+}
+
+/**
+ * Divider
+ */
+export function divider(): StatelessFormComponent {
+  return {
+    type: 'divider',
+    render(form: ModalFormData) {
+      form.divider();
+    },
   };
 }
 

@@ -17,6 +17,10 @@ export class ModalForm {
     const form = new ModalFormData()
       .title(this.config.title);
 
+    if (this.config.submitButtonText) {
+      form.submitButton(this.config.submitButtonText);
+    }
+
     for (const component of this.config.components) {
       component.render(form);
     }

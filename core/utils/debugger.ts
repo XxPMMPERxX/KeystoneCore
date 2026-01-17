@@ -177,7 +177,6 @@ class SourceMapDebugger {
       const output: string[] = [];
       output.push('');
       output.push(`${COLOR.yellow}━━━━━━━━━━━━━━━━━━━━━━${COLOR.reset}`);
-      output.push(`${COLOR.bold}${COLOR.cyan}📍 DEBUG${COLOR.reset}`);
 
       let position: ReturnType<typeof this.getOriginalPosition> = null;
 
@@ -197,8 +196,8 @@ class SourceMapDebugger {
 
       if (position) {
         const file = position.source;
-        output.push(`${COLOR.blue}📄 ${file}:${position.line}:${position.column}${COLOR.reset}`);
-        if (position.name) output.push(`${COLOR.cyan}🏷 ${position.name}${COLOR.reset}`);
+        output.push(`${COLOR.blue}${file}:${position.line}:${position.column}${COLOR.reset}`);
+        if (position.name) output.push(`${COLOR.cyan}${position.name}${COLOR.reset}`);
 
         if (position.content) {
           const lines = position.content.split('\n');
@@ -219,11 +218,11 @@ class SourceMapDebugger {
           }
         }
       } else {
-        output.push(`${COLOR.gray}📍 Location: (source map not available)${COLOR.reset}`);
+        output.push(`${COLOR.gray}Location: (source map not available)${COLOR.reset}`);
       }
 
       output.push(`${COLOR.gray}─────────────────────${COLOR.reset}`);
-      output.push(`${COLOR.bold}${COLOR.white}💾 Values:${COLOR.reset}`);
+      output.push(`${COLOR.bold}${COLOR.white}Values:${COLOR.reset}`);
 
       args.forEach((arg, i) => {
         let val: string;

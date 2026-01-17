@@ -7,12 +7,20 @@ import { MessageForm } from './messageForm';
 
 export interface FormComponent<T = any> {
   type: string;
+  opts: object;
   render(form: ModalFormData): void;
   handle?(player: Player, value: T): void;
 }
 
+export interface StatelessFormComponent {
+  type: string;
+  opts?: object;
+  render(form: ModalFormData): void;
+};
+
 export interface ModalFormConfig<T = any> {
   title: string;
+  submitButtonText?: string;
   previousForm?: ModalForm | ActionForm | MessageForm;
   components: FormComponent[];
   handle?(player: Player, values?: T[] | undefined): void;
