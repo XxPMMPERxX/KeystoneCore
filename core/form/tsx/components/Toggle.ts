@@ -5,6 +5,9 @@ interface ToggleProps {
   defaultValue?: boolean;
 };
 
+/**
+ * ModalFormでトグル切り替えを行えるコンポーネント
+ */
 export default function Toggle({
   label,
   defaultValue = false,

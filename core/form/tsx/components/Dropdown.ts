@@ -6,6 +6,9 @@ interface DropdownProps {
   defaultValueIndex?: number;
 };
 
+/**
+ * ModalFormでドロップダウン選択を行えるコンポーネント
+ */
 export default function Dropdown({
   label,
   options,

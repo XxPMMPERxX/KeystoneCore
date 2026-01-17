@@ -8,6 +8,9 @@ interface SliderProps {
   defaultValue?: number;
 };
 
+/**
+ * ModalFormでスライダー表示するコンポーネント
+ */
 export default function Slider({
   label,
   min,

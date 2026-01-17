@@ -32,6 +32,7 @@ export function textField(opts: {
   label: string;
   placeholder?: string;
   default?: string;
+  tooltip?: string;
   handler?(player: Player, value: string): void;
 }): FormComponent<string> {
   return {
@@ -40,7 +41,10 @@ export function textField(opts: {
       form.textField(
         opts.label,
         opts.placeholder ?? '',
-        { defaultValue: opts.default ?? '' }
+        {
+          defaultValue: opts.default ?? '',
+          tooltip: opts.tooltip,
+        },
       );
     },
     handle(player, value) {
