@@ -119,6 +119,7 @@ const behaviorPacker = ({
             '@minecraft/server',
             '@minecraft/server-net',
             '@minecraft/server-ui',
+            '@minecraft/server-admin',
           ],
           input: {
             index: resolve(process.cwd(), './src/index.ts'),
